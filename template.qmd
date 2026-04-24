@@ -4,6 +4,7 @@ date: today
 format: gfm
 params:
   r0: 12
+  threads: 8
 ---
 
 ```{r}
@@ -11,7 +12,8 @@ params:
 #| echo: false
 if (!exists("params")) {
   params <- list(
-    r0 = 12
+    r0 = 8,
+    threads = 8
   )
 }
 ```
@@ -175,7 +177,7 @@ measles_model |>
     nsims = 400,
     seed  = 8812,
     saver = make_saver("outbreak_size", "hospitalizations"),
-    nthreads = 2L
+    nthreads = params$threads
   )
 ```
 
@@ -347,7 +349,7 @@ measles_model |>
     nsims = 400,
     seed  = 8812,
     saver = make_saver("outbreak_size", "hospitalizations"),
-    nthreads = 2L
+    nthreads = params$threads
   )
 
 # Checking no quarantine in scenario summary
@@ -401,7 +403,7 @@ legend(
 )
 ```
 
-So, although mild, the quarantine process seems to have an effect in the outbreak size, with a higher number of cases observed in the scenario without quarantine.
+The probability of observing an outbreak of more than 100 cases is `r (mean(os_q > 100) * 100) |> sprintf(fmt = "%.2f")`% with quarantine, and `r (mean(os_nq > 100) * 100) |> sprintf(fmt = "%.2f")`% without quarantine. So, although mild, the quarantine process seems to have an effect in the outbreak size, with a higher number of cases observed in the scenario without quarantine.
 
 ```{r}
 #| label: saving-for-manuscript

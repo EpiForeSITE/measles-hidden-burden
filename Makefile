@@ -6,7 +6,11 @@ all:
 	R0=15 $(MAKE) report
 
 R0 ?= 12
-report:
-	quarto render short-creek.qmd \
-		--output short-creek-$(R0).md \
-		-P r0=$(R0)
+report: clean
+	cp template.qmd short-creek-$(R0).qmd && \
+	quarto render short-creek-$(R0).qmd \
+		-P r0=$(R0) && \
+	rm -f short-creek-$(R0).qmd
+
+clean:
+	rm -f short-creek*.qmd

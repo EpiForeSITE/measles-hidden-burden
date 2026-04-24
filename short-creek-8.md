@@ -111,7 +111,7 @@ short_creek_matrix[, 1:5] |>
 image(short_creek_matrix)
 ```
 
-![](short-creek_files/figure-commonmark/data-peak-matrix-1.png)
+![](short-creek-8_files/figure-commonmark/data-peak-matrix-1.png)
 
 One important thing to note is that the data in `short_creek` must
 coincide with that in the contact matrix, particularly, there should be
@@ -238,11 +238,11 @@ measles_model |>
     nsims = 400,
     seed  = 8812,
     saver = make_saver("outbreak_size", "hospitalizations"),
-    nthreads = 2L
+    nthreads = params$threads
   )
 ```
 
-    Starting multiple runs (400) using 2 thread(s)
+    Starting multiple runs (400) using 8 thread(s)
     _________________________________________________________________________
     _________________________________________________________________________
     ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| done.
@@ -268,11 +268,11 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 10.00s (400 runs)
-    Last run speed      : 34.91 million agents x day / second
-    Average run speed   : 82.08 million agents x day / second
+    Total elapsed t     : 2.00s (400 runs)
+    Last run speed      : 34.20 million agents x day / second
+    Average run speed   : 281.64 million agents x day / second
     Rewiring            : off
-    Last seed used      : 425702719
+    Last seed used      : 522087843
 
     Global events:
      - Quarantine process (runs daily)
@@ -302,31 +302,31 @@ summary(measles_model)
      - Vax efficacy                    : 0.9700
 
     Distribution of the population at time 365:
-      - ( 0) Susceptible             : 5629 -> 3447
+      - ( 0) Susceptible             : 5629 -> 3531
       - ( 1) Latent                  :    1 -> 4
-      - ( 2) Prodromal               :    0 -> 3
+      - ( 2) Prodromal               :    0 -> 4
       - ( 3) Rash                    :    0 -> 1
-      - ( 4) Isolated                :    0 -> 1
-      - ( 5) Isolated Recovered      :    0 -> 1
+      - ( 4) Isolated                :    0 -> 0
+      - ( 5) Isolated Recovered      :    0 -> 2
       - ( 6) Quarantined Latent      :    0 -> 1
-      - ( 7) Quarantined Susceptible :    0 -> 34
-      - ( 8) Quarantined Prodromal   :    0 -> 0
+      - ( 7) Quarantined Susceptible :    0 -> 14
+      - ( 8) Quarantined Prodromal   :    0 -> 1
       - ( 9) Quarantined Recovered   :    0 -> 0
       - (10) Hospitalized            :    0 -> 0
-      - (11) Recovered               :    0 -> 2138
+      - (11) Recovered               :    0 -> 2072
 
     Transition Probabilities:
      - Susceptible              0.99  0.00     -     -     -     -  0.00  0.01     -     -     -     -
-     - Latent                      -  0.87  0.08     -     -     -  0.04     -  0.00     -     -     -
-     - Prodromal                   -     -  0.74  0.25  0.00     -     -     -  0.01     -     -     -
-     - Rash                        -     -     -  0.30  0.32  0.16     -     -     -     -  0.04  0.18
-     - Isolated                    -     -     -  0.15  0.49  0.25     -     -     -     -  0.04  0.08
-     - Isolated Recovered          -     -     -     -     -  0.59     -     -     -     -     -  0.41
-     - Quarantined Latent          -  0.02  0.00     -     -     -  0.90     -  0.09     -     -     -
+     - Latent                      -  0.87  0.08     -     -     -  0.05     -  0.00     -     -     -
+     - Prodromal                   -     -  0.73  0.25  0.00     -     -     -  0.01     -     -     -
+     - Rash                        -     -     -  0.31  0.32  0.16     -     -     -     -  0.03  0.17
+     - Isolated                    -     -     -  0.13  0.49  0.27     -     -     -     -  0.04  0.08
+     - Isolated Recovered          -     -     -     -     -  0.58     -     -     -     -     -  0.42
+     - Quarantined Latent          -  0.02  0.00     -     -     -  0.90     -  0.08     -     -     -
      - Quarantined Susceptible  0.05     -     -     -     -     -     -  0.95     -     -     -     -
-     - Quarantined Prodromal       -     -  0.02     -  0.25     -     -     -  0.73     -     -     -
+     - Quarantined Prodromal       -     -  0.02     -  0.26     -     -     -  0.73     -     -     -
      - Quarantined Recovered       -     -     -     -     -     -     -     -     -     -     -     -
-     - Hospitalized                -     -     -     -     -     -     -     -     -     -  0.85  0.15
+     - Hospitalized                -     -     -     -     -     -     -     -     -     -  0.86  0.14
      - Recovered                   -     -     -     -     -     -     -     -     -     -     -  1.00
 
 To retrieve the results, we use the `run_multiple_get_results()`
@@ -395,7 +395,7 @@ lines(
 )
 ```
 
-![](short-creek_files/figure-commonmark/timeline-outbreak-size-1.png)
+![](short-creek-8_files/figure-commonmark/timeline-outbreak-size-1.png)
 
 We can also investigate the distribution of the final counts
 
@@ -430,7 +430,7 @@ text(
 )
 ```
 
-![](short-creek_files/figure-commonmark/hist-outbreak-size-1.png)
+![](short-creek-8_files/figure-commonmark/hist-outbreak-size-1.png)
 
 The probability of a large outbreak (more than 100 cases) is 56.5%.
 
@@ -486,7 +486,7 @@ hosp_tot[, .(vax, unvax)] |>
   )
 ```
 
-![](short-creek_files/figure-commonmark/summary-hosp-1.png)
+![](short-creek-8_files/figure-commonmark/summary-hosp-1.png)
 
 ## Scenario without Quarantine
 
@@ -507,11 +507,11 @@ measles_model |>
     nsims = 400,
     seed  = 8812,
     saver = make_saver("outbreak_size", "hospitalizations"),
-    nthreads = 2L
+    nthreads = params$threads
   )
 ```
 
-    Starting multiple runs (400) using 2 thread(s)
+    Starting multiple runs (400) using 8 thread(s)
     _________________________________________________________________________
     _________________________________________________________________________
     ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| done.
@@ -532,11 +532,11 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 20.00s (800 runs)
-    Last run speed      : 35.10 million agents x day / second
-    Average run speed   : 79.07 million agents x day / second
+    Total elapsed t     : 6.00s (800 runs)
+    Last run speed      : 34.43 million agents x day / second
+    Average run speed   : 259.25 million agents x day / second
     Rewiring            : off
-    Last seed used      : 425702719
+    Last seed used      : 522087843
 
     Global events:
      - Quarantine process (runs daily)
@@ -566,7 +566,7 @@ summary(measles_model)
      - Vax efficacy                    : 0.9700
 
     Distribution of the population at time 365:
-      - ( 0) Susceptible             : 5629 -> 2575
+      - ( 0) Susceptible             : 5629 -> 2587
       - ( 1) Latent                  :    1 -> 0
       - ( 2) Prodromal               :    0 -> 0
       - ( 3) Rash                    :    0 -> 0
@@ -577,20 +577,20 @@ summary(measles_model)
       - ( 8) Quarantined Prodromal   :    0 -> 0
       - ( 9) Quarantined Recovered   :    0 -> 0
       - (10) Hospitalized            :    0 -> 0
-      - (11) Recovered               :    0 -> 3054
+      - (11) Recovered               :    0 -> 3042
 
     Transition Probabilities:
      - Susceptible              1.00  0.00     -     -     -     -     -     -     -     -     -     -
      - Latent                      -  0.92  0.08     -     -     -     -     -     -     -     -     -
      - Prodromal                   -     -  0.75  0.25     -     -     -     -     -     -     -     -
-     - Rash                        -     -     -  0.30  0.32  0.17     -     -     -     -  0.04  0.18
-     - Isolated                    -     -     -  0.21  0.41  0.23     -     -     -     -  0.03  0.11
-     - Isolated Recovered          -     -     -     -     -  0.56     -     -     -     -     -  0.44
+     - Rash                        -     -     -  0.32  0.31  0.16     -     -     -     -  0.04  0.16
+     - Isolated                    -     -     -  0.22  0.40  0.22     -     -     -     -  0.03  0.12
+     - Isolated Recovered          -     -     -     -     -  0.54     -     -     -     -     -  0.46
      - Quarantined Latent          -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Susceptible     -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Prodromal       -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Recovered       -     -     -     -     -     -     -     -     -     -     -     -
-     - Hospitalized                -     -     -     -     -     -     -     -     -     -  0.85  0.15
+     - Hospitalized                -     -     -     -     -     -     -     -     -     -  0.86  0.14
      - Recovered                   -     -     -     -     -     -     -     -     -     -     -  1.00
 
 Like before, we can extract the results using the
@@ -639,11 +639,13 @@ legend(
 )
 ```
 
-![](short-creek_files/figure-commonmark/compare-scenarios-1.png)
+![](short-creek-8_files/figure-commonmark/compare-scenarios-1.png)
 
-So, although mild, the quarantine process seems to have an effect in the
-outbreak size, with a higher number of cases observed in the scenario
-without quarantine.
+The probability of observing an outbreak of more than 100 cases is
+56.50% with quarantine, and 76.25% without quarantine. So, although
+mild, the quarantine process seems to have an effect in the outbreak
+size, with a higher number of cases observed in the scenario without
+quarantine.
 
 ## Analyzing the peak time
 
@@ -681,7 +683,7 @@ peak_no_quarantine |>
     theme_minimal()
 ```
 
-![](short-creek_files/figure-commonmark/peak-time-1.png)
+![](short-creek-8_files/figure-commonmark/peak-time-1.png)
 
 ## Final comments
 

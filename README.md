@@ -4,9 +4,11 @@ This repository contains the R code needed to reproduce the paper XYZ. To execut
 
 ## Scenarios
 
-We have various scenarios:
+We have various scenarios: 
 
 - R0 8 ([link](./short-creek-8.md))
 - R0 10 ([link](./short-creek-10.md))
 - R0 12 ([link](./short-creek-12.md))
 - R0 15 ([link](./short-creek-15.md))
+
+You can run other scenarios by calling `R0=[ your R0 value ] make report`. It will create a `short-creek-[ your R0 value ].md` file.
