@@ -1,5 +1,5 @@
 George G. Vega Yon, Ph.D.
-2026-04-24
+2026-04-26
 
 # Scenario of Short Creek Measles Outbreak (R0 = 8)
 
@@ -268,9 +268,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 2.00s (400 runs)
-    Last run speed      : 34.20 million agents x day / second
-    Average run speed   : 281.64 million agents x day / second
+    Total elapsed t     : 3.00s (400 runs)
+    Last run speed      : 21.73 million agents x day / second
+    Average run speed   : 205.55 million agents x day / second
     Rewiring            : off
     Last seed used      : 522087843
 
@@ -532,9 +532,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 6.00s (800 runs)
-    Last run speed      : 34.43 million agents x day / second
-    Average run speed   : 259.25 million agents x day / second
+    Total elapsed t     : 8.00s (800 runs)
+    Last run speed      : 26.03 million agents x day / second
+    Average run speed   : 194.60 million agents x day / second
     Rewiring            : off
     Last seed used      : 522087843
 
