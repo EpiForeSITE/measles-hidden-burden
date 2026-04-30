@@ -1,5 +1,5 @@
 George G. Vega Yon, Ph.D.
-2026-04-26
+2026-04-30
 
 # Scenario of Short Creek Measles Outbreak (R0 = 8)
 
@@ -235,14 +235,14 @@ Now, we can specify what to record from the simulation.
 measles_model |>
   run_multiple(
     ndays = 365,
-    nsims = 400,
+    nsims = params$nsims,
     seed  = 8812,
     saver = make_saver("outbreak_size", "hospitalizations"),
     nthreads = params$threads
   )
 ```
 
-    Starting multiple runs (400) using 8 thread(s)
+    Starting multiple runs (1000) using 8 thread(s)
     _________________________________________________________________________
     _________________________________________________________________________
     ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| done.
@@ -268,11 +268,11 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 3.00s (400 runs)
-    Last run speed      : 21.73 million agents x day / second
-    Average run speed   : 205.55 million agents x day / second
+    Total elapsed t     : 7.00s (1000 runs)
+    Last run speed      : 29.19 million agents x day / second
+    Average run speed   : 261.88 million agents x day / second
     Rewiring            : off
-    Last seed used      : 522087843
+    Last seed used      : 321912252
 
     Global events:
      - Quarantine process (runs daily)
@@ -302,31 +302,31 @@ summary(measles_model)
      - Vax efficacy                    : 0.9700
 
     Distribution of the population at time 365:
-      - ( 0) Susceptible             : 5629 -> 3531
-      - ( 1) Latent                  :    1 -> 4
-      - ( 2) Prodromal               :    0 -> 4
-      - ( 3) Rash                    :    0 -> 1
+      - ( 0) Susceptible             : 5629 -> 3543
+      - ( 1) Latent                  :    1 -> 5
+      - ( 2) Prodromal               :    0 -> 2
+      - ( 3) Rash                    :    0 -> 2
       - ( 4) Isolated                :    0 -> 0
-      - ( 5) Isolated Recovered      :    0 -> 2
-      - ( 6) Quarantined Latent      :    0 -> 1
-      - ( 7) Quarantined Susceptible :    0 -> 14
+      - ( 5) Isolated Recovered      :    0 -> 0
+      - ( 6) Quarantined Latent      :    0 -> 0
+      - ( 7) Quarantined Susceptible :    0 -> 38
       - ( 8) Quarantined Prodromal   :    0 -> 1
       - ( 9) Quarantined Recovered   :    0 -> 0
-      - (10) Hospitalized            :    0 -> 0
-      - (11) Recovered               :    0 -> 2072
+      - (10) Hospitalized            :    0 -> 1
+      - (11) Recovered               :    0 -> 2038
 
     Transition Probabilities:
-     - Susceptible              0.99  0.00     -     -     -     -  0.00  0.01     -     -     -     -
-     - Latent                      -  0.87  0.08     -     -     -  0.05     -  0.00     -     -     -
-     - Prodromal                   -     -  0.73  0.25  0.00     -     -     -  0.01     -     -     -
-     - Rash                        -     -     -  0.31  0.32  0.16     -     -     -     -  0.03  0.17
-     - Isolated                    -     -     -  0.13  0.49  0.27     -     -     -     -  0.04  0.08
-     - Isolated Recovered          -     -     -     -     -  0.58     -     -     -     -     -  0.42
-     - Quarantined Latent          -  0.02  0.00     -     -     -  0.90     -  0.08     -     -     -
+     - Susceptible              0.99  0.00     -     -     -     -  0.00  0.00     -     -     -     -
+     - Latent                      -  0.87  0.08     -     -     -  0.04     -  0.00     -     -     -
+     - Prodromal                   -     -  0.74  0.25  0.00     -     -     -  0.01     -     -     -
+     - Rash                        -     -     -  0.32  0.32  0.17     -     -     -     -  0.03  0.17
+     - Isolated                    -     -     -  0.15  0.49  0.25     -     -     -     -  0.03  0.07
+     - Isolated Recovered          -     -     -     -     -  0.51     -     -     -     -     -  0.49
+     - Quarantined Latent          -  0.01  0.00     -     -     -  0.90     -  0.08     -     -     -
      - Quarantined Susceptible  0.05     -     -     -     -     -     -  0.95     -     -     -     -
-     - Quarantined Prodromal       -     -  0.02     -  0.26     -     -     -  0.73     -     -     -
+     - Quarantined Prodromal       -     -  0.02     -  0.24     -     -     -  0.74     -     -     -
      - Quarantined Recovered       -     -     -     -     -     -     -     -     -     -     -     -
-     - Hospitalized                -     -     -     -     -     -     -     -     -     -  0.86  0.14
+     - Hospitalized                -     -     -     -     -     -     -     -     -     -  0.84  0.16
      - Recovered                   -     -     -     -     -     -     -     -     -     -     -  1.00
 
 To retrieve the results, we use the `run_multiple_get_results()`
@@ -432,7 +432,7 @@ text(
 
 ![](short-creek-8_files/figure-commonmark/hist-outbreak-size-1.png)
 
-The probability of a large outbreak (more than 100 cases) is 56.5%.
+The probability of a large outbreak (more than 100 cases) is 59.3%.
 
 ## Hospitalizations
 
@@ -532,9 +532,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 8.00s (800 runs)
-    Last run speed      : 26.03 million agents x day / second
-    Average run speed   : 194.60 million agents x day / second
+    Total elapsed t     : 11.00s (1400 runs)
+    Last run speed      : 36.46 million agents x day / second
+    Average run speed   : 246.21 million agents x day / second
     Rewiring            : off
     Last seed used      : 522087843
 
@@ -642,7 +642,7 @@ legend(
 ![](short-creek-8_files/figure-commonmark/compare-scenarios-1.png)
 
 The probability of observing an outbreak of more than 100 cases is
-56.50% with quarantine, and 76.25% without quarantine. So, although
+59.30% with quarantine, and 76.25% without quarantine. So, although
 mild, the quarantine process seems to have an effect in the outbreak
 size, with a higher number of cases observed in the scenario without
 quarantine.
