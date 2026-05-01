@@ -1,6 +1,6 @@
 # Short Creek Simulations
 
-This repository contains the R code needed to reproduce the analyses in paper XYZ. Dependencies include the [`measles`](https://github.com/UofUEpiBio/measles) R package (version 0.3.1-0), [Quarto](https://quarto.org) for rendering reports, `ggplot2` for visualization, and `data.table` for data wrangling.
+This repository contains the R code needed to reproduce the analyses in paper *"Hidden Burden of a Measles Outbreak Revealed by Genomic and Transmission Models"*. Dependencies include the [`measles`](https://github.com/UofUEpiBio/measles) R package (version 0.3.1-0), [Quarto](https://quarto.org) for rendering reports, `ggplot2` for visualization, and `data.table` for data wrangling.
 
 ## Scenarios
 
