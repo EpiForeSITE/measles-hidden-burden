@@ -9,11 +9,13 @@ all:
 	R0=15 $(MAKE) report
 
 R0 ?= 12
+EPISTORM ?= FALSE
 report: clean
-	cp template.qmd short-creek-$(R0).qmd && \
-	quarto render short-creek-$(R0).qmd \
-		-P r0=$(R0) && \
-	rm -f short-creek-$(R0).qmd
+	cp template.qmd short-creek-$(R0)-$(EPISTORM).qmd && \
+	quarto render short-creek-$(R0)-$(EPISTORM).qmd \
+		-P r0=$(R0) \
+		-P epistorm=$(EPISTORM) && \
+	rm -f short-creek-$(R0)-$(EPISTORM).qmd
 
 clean:
 	rm -f short-creek*.qmd

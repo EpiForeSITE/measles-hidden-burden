@@ -6,6 +6,7 @@ params:
   r0: 12
   nsims: 1000
   threads: 8
+  epistorm: false
 ---
 
 ```{r}
@@ -15,7 +16,8 @@ if (!exists("params")) {
   params <- list(
     r0 = 8,
     nsims = 1000,
-    threads = 8
+    threads = 8,
+    epistorm = TRUE
   )
 }
 ```
@@ -43,6 +45,15 @@ For the data, we need two datasets: information about the population distributio
 #| label: data
 data(short_creek, package = "measles")
 data(short_creek_matrix, package = "measles")
+```
+
+If we are using the Epistorm data, we need to adjust it
+
+```{r}
+#| label: adjust-epistorm
+if (params$epistorm) {
+  short_creek_matrix <- readRDS("data/short_creek_epistorm.rds")
+}
 ```
 
 Let's take a look at the datasets:
@@ -268,7 +279,7 @@ hist_ans <- with(
         "Mixing model with age and school data (%i simulations)",
         nsims
       ),
-      breaks = 20,
+      breaks = 50,
       xlab   = "Cases",
       xlim   = c(0, max(outbreak_size, n_unvax) * 1.1)
     )
@@ -385,7 +396,7 @@ bar_cols <- c("tomato", "steelblue") |>
   adjustcolor(alpha.f = 0.5)
 
 hist(
-  os_nq, breaks = 20,
+  os_nq, breaks = 50,
   main = "Outbreak Size",
   col = bar_cols[1],
   xlab = "Outbreak size"
@@ -393,7 +404,7 @@ hist(
 hist(
   os_q,
   col = bar_cols[2],
-  add = TRUE, breaks = 20
+  add = TRUE, breaks = 50
 )
 
 legend(
@@ -421,8 +432,9 @@ saveRDS(
     hospitalizations_no_quarantine = hospitalizations_no_quarantine
   ),
   file = sprintf(
-    "short-creek-scenarios-r0:%.2f.rds",
-    params$r0
+    "short-creek-scenarios-r0:%.2f-epistorm:%s.rds",
+    params$r0,
+    params$epistorm
   )
 )
 ```
