@@ -91,7 +91,7 @@ for (n in 1:nrow(es_ranges)) {
 # Based on indices from 0 to 80
 ages <- data.frame(
   from = c(0, 1,  5,  5,  5, 12, 12, 12, 14, 14, 14, 18, 25, 45, 70) + 1,
-  to   = c(1, 4, 11, 11, 11, 13, 13, 13, 17, 17, 17, 24, 44, 69, 80) + 1
+  to   = c(0, 4, 11, 11, 11, 13, 13, 13, 17, 17, 17, 24, 44, 69, 80) + 1
 )
 
 # To group them, we need to 

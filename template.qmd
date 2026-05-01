@@ -17,7 +17,7 @@ if (!exists("params")) {
     r0 = 8,
     nsims = 1000,
     threads = 8,
-    epistorm = TRUE
+    epistorm = FALSE
   )
 }
 ```
@@ -189,7 +189,7 @@ measles_model |>
     ndays = 365,
     nsims = params$nsims,
     seed  = 8812,
-    saver = make_saver("outbreak_size", "hospitalizations"),
+    saver = make_saver("outbreak_size", "hospitalizations", "reproductive"),
     nthreads = params$threads
   )
 ```
@@ -220,6 +220,25 @@ The function call will get us the results as a list of data.frames (data.table o
 library(data.table)
 outbreak_size <- ans$outbreak_size |> as.data.table()
 hospitalizations <- ans$hospitalizations |> as.data.table()
+reproductive <- ans$reproductive |> as.data.table()
+```
+
+## Reproductive number
+
+```{r}
+#| label: reproductive-number
+# Filter the index case
+reproductive <- reproductive[(source != -1) & source_exposure_date == 0]
+
+reproductive[, mean(rt)]
+reproductive[, median(rt)]
+reproductive[rt > 0, mean(rt)]
+hist(
+  reproductive$rt,
+  breaks = 50,
+  main = "Reproductive number distribution",
+  xlab = "Rt"
+  )
 ```
 
 ## Outbreak size

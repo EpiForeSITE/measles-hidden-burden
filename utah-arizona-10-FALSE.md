@@ -244,7 +244,7 @@ measles_model |>
     ndays = 365,
     nsims = params$nsims,
     seed  = 8812,
-    saver = make_saver("outbreak_size", "hospitalizations"),
+    saver = make_saver("outbreak_size", "hospitalizations", "reproductive"),
     nthreads = params$threads
   )
 ```
@@ -275,9 +275,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 7.00s (1000 runs)
-    Last run speed      : 40.50 million agents x day / second
-    Average run speed   : 293.23 million agents x day / second
+    Total elapsed t     : 6.00s (1000 runs)
+    Last run speed      : 39.52 million agents x day / second
+    Average run speed   : 295.17 million agents x day / second
     Rewiring            : off
     Last seed used      : 321912252
 
@@ -356,7 +356,42 @@ to manipulate the information.
 library(data.table)
 outbreak_size <- ans$outbreak_size |> as.data.table()
 hospitalizations <- ans$hospitalizations |> as.data.table()
+reproductive <- ans$reproductive |> as.data.table()
 ```
+
+## Reproductive number
+
+``` r
+# Filter the index case
+reproductive <- reproductive[(source != -1) & source_exposure_date == 0]
+
+reproductive[, mean(rt)]
+```
+
+    [1] 4.551
+
+``` r
+reproductive[, median(rt)]
+```
+
+    [1] 3
+
+``` r
+reproductive[rt > 0, mean(rt)]
+```
+
+    [1] 5.411415
+
+``` r
+hist(
+  reproductive$rt,
+  breaks = 50,
+  main = "Reproductive number distribution",
+  xlab = "Rt"
+  )
+```
+
+![](utah-arizona-10-FALSE_files/figure-commonmark/reproductive-number-1.png)
 
 ## Outbreak size
 
@@ -540,8 +575,8 @@ summary(measles_model)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
     Total elapsed t     : 10.00s (1400 runs)
-    Last run speed      : 33.65 million agents x day / second
-    Average run speed   : 282.16 million agents x day / second
+    Last run speed      : 39.08 million agents x day / second
+    Average run speed   : 281.49 million agents x day / second
     Rewiring            : off
     Last seed used      : 522087843
 

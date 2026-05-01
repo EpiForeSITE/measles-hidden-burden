@@ -97,21 +97,21 @@ short_creek_matrix[, 1:5] |>
 ```
 
              under1 1to4 5to11s1 5to11s2 5to11s3
-    under1     0.74 1.49    0.82    0.82    0.82
-    1to4       0.74 1.49    0.82    0.82    0.82
-    5to11s1    0.02 0.03   16.70    0.75    0.75
-    5to11s2    0.02 0.03    0.75   16.70    0.75
-    5to11s3    0.02 0.03    0.75    0.75   16.70
+    under1     0.37 1.49    0.82    0.82    0.82
+    1to4       0.37 1.49    0.82    0.82    0.82
+    5to11s1    0.01 0.03   16.67    0.75    0.75
+    5to11s2    0.01 0.03    0.75   16.67    0.75
+    5to11s3    0.01 0.03    0.75    0.75   16.67
     12to13s4   0.01 0.03    0.37    0.37    0.37
     12to13s5   0.01 0.03    0.37    0.37    0.37
     12to13s6   0.01 0.03    0.37    0.37    0.37
-    14to17s7   0.02 0.04    0.22    0.22    0.22
-    14to17s8   0.02 0.04    0.22    0.22    0.22
-    14to17s9   0.02 0.04    0.22    0.22    0.22
-    18to24     0.10 0.20    0.55    0.55    0.55
-    25to44     0.17 0.34    0.67    0.67    0.67
-    45to69     0.08 0.16    0.37    0.37    0.37
-    70+        0.01 0.01    0.09    0.09    0.09
+    14to17s7   0.01 0.04    0.22    0.22    0.22
+    14to17s8   0.01 0.04    0.22    0.22    0.22
+    14to17s9   0.01 0.04    0.22    0.22    0.22
+    18to24     0.05 0.20    0.55    0.55    0.55
+    25to44     0.08 0.34    0.67    0.67    0.67
+    45to69     0.04 0.16    0.37    0.37    0.37
+    70+        0.00 0.01    0.09    0.09    0.09
 
 ``` r
 # Looking at it as a heatmap
@@ -244,7 +244,7 @@ measles_model |>
     ndays = 365,
     nsims = params$nsims,
     seed  = 8812,
-    saver = make_saver("outbreak_size", "hospitalizations"),
+    saver = make_saver("outbreak_size", "hospitalizations", "reproductive"),
     nthreads = params$threads
   )
 ```
@@ -276,8 +276,8 @@ summary(measles_model)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
     Total elapsed t     : 5.00s (1000 runs)
-    Last run speed      : 57.98 million agents x day / second
-    Average run speed   : 359.71 million agents x day / second
+    Last run speed      : 61.43 million agents x day / second
+    Average run speed   : 343.28 million agents x day / second
     Rewiring            : off
     Last seed used      : 321912252
 
@@ -304,7 +304,7 @@ summary(measles_model)
      - Quarantine period               : 21.0000
      - Quarantine willingness          : 0.9000
      - Rash period                     : 3.0000
-     - Transmission rate               : 0.2008
+     - Transmission rate               : 0.2012
      - Vaccination rate                : 0.0e+00
      - Vax efficacy                    : 0.9700
 
@@ -356,7 +356,42 @@ to manipulate the information.
 library(data.table)
 outbreak_size <- ans$outbreak_size |> as.data.table()
 hospitalizations <- ans$hospitalizations |> as.data.table()
+reproductive <- ans$reproductive |> as.data.table()
 ```
+
+## Reproductive number
+
+``` r
+# Filter the index case
+reproductive <- reproductive[(source != -1) & source_exposure_date == 0]
+
+reproductive[, mean(rt)]
+```
+
+    [1] 6.566
+
+``` r
+reproductive[, median(rt)]
+```
+
+    [1] 3
+
+``` r
+reproductive[rt > 0, mean(rt)]
+```
+
+    [1] 7.863473
+
+``` r
+hist(
+  reproductive$rt,
+  breaks = 50,
+  main = "Reproductive number distribution",
+  xlab = "Rt"
+  )
+```
+
+![](utah-arizona-15-TRUE_files/figure-commonmark/reproductive-number-1.png)
 
 ## Outbreak size
 
@@ -439,7 +474,7 @@ text(
 
 ![](utah-arizona-15-TRUE_files/figure-commonmark/hist-outbreak-size-1.png)
 
-The probability of a large outbreak (more than 100 cases) is 63.8%.
+The probability of a large outbreak (more than 100 cases) is 63.1%.
 
 ## Hospitalizations
 
@@ -539,9 +574,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 8.00s (1400 runs)
-    Last run speed      : 44.05 million agents x day / second
-    Average run speed   : 328.08 million agents x day / second
+    Total elapsed t     : 9.00s (1400 runs)
+    Last run speed      : 42.64 million agents x day / second
+    Average run speed   : 316.98 million agents x day / second
     Rewiring            : off
     Last seed used      : 522087843
 
@@ -568,31 +603,31 @@ summary(measles_model)
      - Quarantine period               : -1.0000
      - Quarantine willingness          : 0.9000
      - Rash period                     : 3.0000
-     - Transmission rate               : 0.2008
+     - Transmission rate               : 0.2012
      - Vaccination rate                : 0.0e+00
      - Vax efficacy                    : 0.9700
 
     Distribution of the population at time 365:
-      - ( 0) Susceptible             : 5629 -> 2428
+      - ( 0) Susceptible             : 5629 -> 2429
       - ( 1) Latent                  :    1 -> 0
       - ( 2) Prodromal               :    0 -> 0
       - ( 3) Rash                    :    0 -> 0
       - ( 4) Isolated                :    0 -> 0
-      - ( 5) Isolated Recovered      :    0 -> 0
+      - ( 5) Isolated Recovered      :    0 -> 1
       - ( 6) Quarantined Latent      :    0 -> 0
       - ( 7) Quarantined Susceptible :    0 -> 0
       - ( 8) Quarantined Prodromal   :    0 -> 0
       - ( 9) Quarantined Recovered   :    0 -> 0
       - (10) Hospitalized            :    0 -> 0
-      - (11) Recovered               :    0 -> 3202
+      - (11) Recovered               :    0 -> 3200
 
     Transition Probabilities:
      - Susceptible              1.00  0.00     -     -     -     -     -     -     -     -     -     -
-     - Latent                      -  0.92  0.08     -     -     -     -     -     -     -     -     -
+     - Latent                      -  0.91  0.09     -     -     -     -     -     -     -     -     -
      - Prodromal                   -     -  0.75  0.25     -     -     -     -     -     -     -     -
-     - Rash                        -     -     -  0.30  0.32  0.17     -     -     -     -  0.04  0.17
-     - Isolated                    -     -     -  0.22  0.41  0.22     -     -     -     -  0.04  0.12
-     - Isolated Recovered          -     -     -     -     -  0.50     -     -     -     -     -  0.50
+     - Rash                        -     -     -  0.32  0.31  0.16     -     -     -     -  0.04  0.16
+     - Isolated                    -     -     -  0.21  0.41  0.22     -     -     -     -  0.04  0.12
+     - Isolated Recovered          -     -     -     -     -  0.55     -     -     -     -     -  0.45
      - Quarantined Latent          -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Susceptible     -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Prodromal       -     -     -     -     -     -     -     -     -     -     -     -
@@ -649,7 +684,7 @@ legend(
 ![](utah-arizona-15-TRUE_files/figure-commonmark/compare-scenarios-1.png)
 
 The probability of observing an outbreak of more than 100 cases is
-63.80% with quarantine, and 77.25% without quarantine. So, although
+63.10% with quarantine, and 77.75% without quarantine. So, although
 mild, the quarantine process seems to have an effect in the outbreak
 size, with a higher number of cases observed in the scenario without
 quarantine.
