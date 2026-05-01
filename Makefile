@@ -11,11 +11,11 @@ all:
 R0 ?= 12
 EPISTORM ?= FALSE
 report: clean
-	cp template.qmd short-creek-$(R0)-$(EPISTORM).qmd && \
-	quarto render short-creek-$(R0)-$(EPISTORM).qmd \
+	cp template.qmd utah-arizona-$(R0)-$(EPISTORM).qmd && \
+	quarto render utah-arizona-$(R0)-$(EPISTORM).qmd \
 		-P r0=$(R0) \
 		-P epistorm=$(EPISTORM) && \
-	rm -f short-creek-$(R0)-$(EPISTORM).qmd
+	rm -f utah-arizona-$(R0)-$(EPISTORM).qmd
 
 clean:
-	rm -f short-creek*.qmd
+	rm -f utah-arizona*.qmd

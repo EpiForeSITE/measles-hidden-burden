@@ -22,13 +22,13 @@ if (!exists("params")) {
 }
 ```
 
-# Scenario of Short Creek Measles Outbreak (R0 = `r params$r0`)
+# Scenario of Utah-Arizona Border Measles Outbreak (R0 = `r params$r0`)
 
 ::: {.callout-warning title="Warning"}
 The data and model used in this vignette are for demonstration purposes only and do not reflect real-world conditions accurately. As in most agent-based models, the simulations performed here are simplified representations of the reality and provide rich information for scenario modeling, but not necessarily for forecasting or parameter estimation.
 :::
 
-During the 2025 US Measles outbreak, the number of cases in the state of Utah started to climb quickly in the Short Creek region (on the Utah-Arizona border). This vignette shows how we can use the mixing model of the `measles` R package to do scenario modeling of the situation using both age and school data.
+During the 2025 US measles outbreak, the number of cases in Utah climbed rapidly in communities along the Utah-Arizona border. This vignette shows how we can use the mixing model of the `measles` R package to do scenario modeling of the situation using both age and school data.
 
 ## Set up
 
@@ -242,7 +242,7 @@ with(
       pch = 19,
       ylab = "Cases",
       xlab = "Day",
-      main = "Measles outbreak size in Short Creek",
+      main = "Measles outbreak size at the Utah-Arizona Border",
       sub = sprintf(
         "Mixing model with age and school data (%i simulations)",
         nsims
@@ -274,7 +274,7 @@ hist_ans <- with(
   {
     hist(
       outbreak_size,
-      main = "Measles outbreak size in Short Creek",
+      main = "Measles outbreak size at the Utah-Arizona Border",
       sub = sprintf(
         "Mixing model with age and school data (%i simulations)",
         nsims
@@ -432,7 +432,7 @@ saveRDS(
     hospitalizations_no_quarantine = hospitalizations_no_quarantine
   ),
   file = sprintf(
-    "short-creek-scenarios-r0:%.2f-epistorm:%s.rds",
+    "utah-arizona-scenarios-r0:%.2f-epistorm:%s.rds",
     params$r0,
     params$epistorm
   )
@@ -469,7 +469,7 @@ peak_no_quarantine |>
     facet_wrap(~ type) +
     geom_line(alpha = 0.1) +
     labs(
-      title = "Measles incidence in Short Creek (no quarantine)",
+      title = "Measles incidence at the Utah-Arizona Border (no quarantine)",
       x = "Day",
       y = "Incidence"
     ) +

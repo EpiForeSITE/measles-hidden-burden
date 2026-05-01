@@ -85,9 +85,9 @@ for (n in 1:nrow(es_ranges)) {
 }
 
 # ==============================================================================
-# Adapting for short creek age ranges
+# Adapting for Utah-Arizona border age ranges
 
-# Ages from short creek
+# Ages from the Utah-Arizona border
 # Based on indices from 0 to 80
 ages <- data.frame(
   from = c(0, 1,  5,  5,  5, 12, 12, 12, 14, 14, 14, 18, 25, 45, 70) + 1,
