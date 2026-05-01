@@ -1,14 +1,42 @@
 # Short Creek Simulations
 
-This repository contains the R code needed to reproduce the paper XYZ. To execute the analyses, you require the `measles` R package version 0.3.1-0 (which you can find at <https://github.com/UofUEpiBio/measles>), quarto for rendering the reports, the `ggplot2` R package for visualization, and `data.table` for data wrangling.
+This repository contains the R code needed to reproduce the analyses in paper XYZ. Dependencies include the [`measles`](https://github.com/UofUEpiBio/measles) R package (version 0.3.1-0), [Quarto](https://quarto.org) for rendering reports, `ggplot2` for visualization, and `data.table` for data wrangling.
 
 ## Scenarios
 
-We have various scenarios: 
+The following scenarios were run across a range of basic reproduction numbers (R0):
 
-- R0 8 ([link](./short-creek-8.md))
-- R0 10 ([link](./short-creek-10.md))
-- R0 12 ([link](./short-creek-12.md))
-- R0 15 ([link](./short-creek-15.md))
+| R0 | Results |
+|----|---------|
+| 8  | [link](./short-creek-8.-FALSEmd) |
+| 10 | [link](./short-creek-10-FALSE.md) |
+| 12 | [link](./short-creek-12-FALSE.md) |
+| 14 | [link](./short-creek-14-FALSE.md) |
+| 15 | [link](./short-creek-15-FALSE.md) |
+| 16 | [link](./short-creek-16-FALSE.md) |
+| 18 | [link](./short-creek-18-FALSE.md) |
 
-You can run other scenarios by calling `R0=[ your R0 value ] make report`. It will create a `short-creek-[ your R0 value ].md` file.
+### Sensitivity analysis
+
+As a sensitivity analysis, each scenario was also run using an adapted version of the Epistorm US contact matrix (see [`data/README.md`](./data/README.md) for details):
+
+| R0 | Results |
+|----|---------|
+| 8  | [link](./short-creek-8-TRUE.md) |
+| 10 | [link](./short-creek-10-TRUE.md) |
+| 12 | [link](./short-creek-12-TRUE.md) |
+| 14 | [link](./short-creek-14-TRUE.md) |
+| 15 | [link](./short-creek-15-TRUE.md) |
+| 16 | [link](./short-creek-16-TRUE.md) |
+| 18 | [link](./short-creek-18-TRUE.md) |
+
+## Running additional scenarios
+
+To run a scenario with a custom R0 value, execute:
+
+```bash
+R0=<value> EPISTORM=FALSE make report
+```
+
+The `EPISTORM=FALSE` will use POLYMOD's contact data (default), setting it to `TRUE` will use Epistorm instead. This will generate a `short-creek-<value>.md` report in the repository root.
+
