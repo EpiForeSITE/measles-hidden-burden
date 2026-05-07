@@ -131,6 +131,9 @@ for (n in schools) {
   short_creek_epistorm[n, -n] <- 0.2 * short_creek_epistorm[n, -n]
 }
 
+data(short_creek, package = "measles")
+
+
 saveRDS(
   short_creek_epistorm,
   file = file.path("data", "short_creek_epistorm.rds")
