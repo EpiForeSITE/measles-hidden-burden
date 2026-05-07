@@ -7,6 +7,8 @@ params:
   nsims: 1000
   threads: 8
   epistorm: false
+  rash_contact: 0.0
+  quarantine_willingness: 0.9
 ---
 
 ```{r}
@@ -17,7 +19,9 @@ if (!exists("params")) {
     r0 = 8,
     nsims = 1000,
     threads = 8,
-    epistorm = FALSE
+    epistorm = FALSE,
+    rash_contact = 0.0,
+    quarantine_willingness = 0.9
   )
 }
 ```
@@ -116,10 +120,14 @@ While the decision to calibrate the contact matrix or the transmission probabili
 ```{r}
 #| label: calibrate
 r0 <- params$r0
+
+# Figuring out the duration
+total_duration <- 4 + 3 * params$rash_contact
+
 scaling_factor <- calibrate_mixing_model(
   contact_matrix = short_creek_matrix,
   target_rep_number = r0,
-  infectious_period_days = 4,
+  infectious_period_days = total_duration,
   transmission_prob = 0.2
 )
 ```
@@ -136,8 +144,8 @@ measles_model <- ModelMeaslesMixing(
   # Quarantine and isolation parameters
   days_undetected              = 2,
   quarantine_period            = 21,
-  quarantine_willingness       = 0.9,
-  isolation_willingness        = 0.9,
+  quarantine_willingness       = params$quarantine_willingness,
+  isolation_willingness        = 1.0,
   isolation_period             = 4,
   contact_tracing_success_rate = 0.8,
   contact_tracing_days_window  = 4,
@@ -145,7 +153,8 @@ measles_model <- ModelMeaslesMixing(
   rash_period                  = 3,
   prodromal_period             = 4,
   hospitalization_rate         = h_rate,
-  hospitalization_period       = 7
+  hospitalization_period       = 7,
+  rash_reduction_contact_rate  = 1 - params$rash_contact
 )
 ```
 
@@ -451,9 +460,11 @@ saveRDS(
     hospitalizations_no_quarantine = hospitalizations_no_quarantine
   ),
   file = sprintf(
-    "utah-arizona-scenarios-r0:%.2f-epistorm:%s.rds",
+    "r0_%.2f-epistorm_%s-rash_contact_%.2f-quarantine_willingness_%.2f.rds",
     params$r0,
-    params$epistorm
+    params$epistorm,
+    params$rash_contact,
+    params$quarantine_willingness
   )
 )
 ```

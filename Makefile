@@ -1,21 +1,27 @@
 
 all:
-	R0=8 $(MAKE) report && \
-	R0=10 $(MAKE) report && \
-	R0=12 $(MAKE) report && \
-	R0=14 $(MAKE) report && \
-	R0=16 $(MAKE) report && \
-	R0=18 $(MAKE) report && \
-	R0=15 $(MAKE) report
+	R0=5 $(MAKE) report && \
+	R0=7 $(MAKE) report && \
+	R0=9 $(MAKE) report && \
+	R0=11 $(MAKE) report && \
+	R0=13 $(MAKE) report && \
+	R0=15 $(MAKE) report && \
+	R0=17 $(MAKE) report
 
 R0 ?= 12
 EPISTORM ?= FALSE
+RASH_CONTACT ?= 0.2
+QUARANTINE_WILLINGNESS ?= 0.9
+
 report: clean
-	cp template.qmd utah-arizona-$(R0)-$(EPISTORM).qmd && \
-	quarto render utah-arizona-$(R0)-$(EPISTORM).qmd \
+	REPORT_NAME="r0_$(R0)-epistorm_$(EPISTORM)-rash_contact_$(RASH_CONTACT)-quarantine_willingness_$(QUARANTINE_WILLINGNESS)" && \
+	cp template.qmd scenarios/$$REPORT_NAME.qmd && \
+	quarto render scenarios/$$REPORT_NAME.qmd \
 		-P r0=$(R0) \
-		-P epistorm=$(EPISTORM) && \
-	rm -f utah-arizona-$(R0)-$(EPISTORM).qmd
+		-P epistorm=$(EPISTORM) \
+		-P rash_contact=$(RASH_CONTACT) \
+		-P quarantine_willingness=$(QUARANTINE_WILLINGNESS) && \
+	rm -f scenarios/$$REPORT_NAME.qmd
 
 clean:
-	rm -f utah-arizona*.qmd
+	rm -f scenarios/*.rds
