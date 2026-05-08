@@ -298,3 +298,30 @@ saveRDS(
   cm,
   file = file.path("data", "short_creek_epistorm.rds")
   )
+
+# ==============================================================================
+# Final validation against measles::short_creek_matrix
+# ==============================================================================
+
+ref_matrix <- measles::short_creek_matrix
+ref_pops   <- measles::short_creek$agepops
+
+# 1. Dimensions must match
+stopifnot(
+  "dim(cm) does not match dim(measles::short_creek_matrix)" =
+    identical(dim(cm), dim(ref_matrix))
+)
+
+# 2. Both matrices should be approximately symmetric when scaled by group pops
+max_asym_cm  <- max(abs(cm * grouppops - t(cm * grouppops)))
+max_asym_ref <- max(abs(ref_matrix * ref_pops - t(ref_matrix * ref_pops)))
+
+stopifnot(
+  "cm is not approximately symmetric after scaling by grouppops" =
+    max_asym_cm < 1e-10,
+  "measles::short_creek_matrix is not approximately symmetric after scaling by agepops" =
+    max_asym_ref < 1e-10
+)
+
+message("Validation passed: dimensions match and both matrices are symmetric.")
+
