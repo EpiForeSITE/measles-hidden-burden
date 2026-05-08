@@ -1,5 +1,5 @@
 George G. Vega Yon, Ph.D.
-2026-05-07
+2026-05-08
 
 # Scenario of Utah-Arizona Border Measles Outbreak (R0 = 9)
 
@@ -182,7 +182,7 @@ consistent with the literature on measles.
 r0 <- params$r0
 
 # Figuring out the duration
-total_duration <- 4 + 1/(h_rate + 1/3)
+total_duration <- 4 + 1/(h_rate + 1/4)
 
 scaling_factor <- calibrate_mixing_model(
   contact_matrix = short_creek_matrix,
@@ -191,6 +191,33 @@ scaling_factor <- calibrate_mixing_model(
   transmission_prob = 0.2
 )
 ```
+
+We can inspect how the total number of contacts change after scaling the
+contact matrix:
+
+| Group    | Size |  Vax | Contacts before scaling | Contacts after scaling |
+|:---------|-----:|-----:|------------------------:|-----------------------:|
+| under1   |  141 | 0.00 |                  977.14 |                 228.13 |
+| 1to4     |  562 | 0.27 |                 8129.27 |                1897.89 |
+| 5to11s1  |  296 | 0.06 |                 7479.17 |                1746.12 |
+| 5to11s2  |  414 | 0.36 |                10460.73 |                2442.21 |
+| 5to11s3  |  225 | 0.41 |                 5685.18 |                1327.29 |
+| 12to13s4 |   94 | 0.22 |                 3231.66 |                 754.48 |
+| 12to13s5 |  164 | 0.35 |                 5638.21 |                1316.32 |
+| 12to13s6 |   92 | 0.58 |                 3162.90 |                 738.42 |
+| 14to17s7 |  166 | 0.23 |                 5386.77 |                1257.62 |
+| 14to17s8 |  158 | 0.36 |                 5127.16 |                1197.01 |
+| 14to17s9 |  299 | 0.44 |                 9702.67 |                2265.23 |
+| 18to24   |  817 | 0.36 |                15068.88 |                3518.04 |
+| 25to44   | 1391 | 0.64 |                20659.71 |                4823.30 |
+| 45to69   | 1016 | 0.92 |                 9913.69 |                2314.49 |
+| 70+      |   80 | 1.00 |                  343.18 |                  80.12 |
+| Total    | 5915 | 0.50 |               110966.31 |               25906.66 |
+
+Total number of contacts before and after scaling the contact matrix.
+The total contacts are computed by multiplying the contact matrix by the
+population size of each age group, and then summing across rows. Scaling
+factor: 0.2335
 
 ``` r
 measles_model <- ModelMeaslesMixing(
@@ -209,7 +236,7 @@ measles_model <- ModelMeaslesMixing(
   contact_tracing_success_rate = params$contact_tracing_success,
   contact_tracing_days_window  = 4,
   # Disease paramters
-  rash_period                  = 3,
+  rash_period                  = 4,
   prodromal_period             = 4,
   hospitalization_rate         = h_rate,
   hospitalization_period       = 7,
@@ -295,9 +322,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 18.00s (1000 runs)
-    Last run speed      : 15.17 million agents x day / second
-    Average run speed   : 118.36 million agents x day / second
+    Total elapsed t     : 14.00s (1000 runs)
+    Last run speed      : 23.64 million agents x day / second
+    Average run speed   : 146.75 million agents x day / second
     Rewiring            : off
     Last seed used      : 321912252
 
@@ -323,7 +350,7 @@ summary(measles_model)
      - Prodromal period                : 4.0000
      - Quarantine period               : 21.0000
      - Quarantine willingness          : 0.9000
-     - Rash period                     : 3.0000
+     - Rash period                     : 4.0000
      - Rash reduction contact rate     : 0.5000
      - Transmission rate               : 0.2000
      - Vaccination rate                : 0.0e+00
@@ -347,8 +374,8 @@ summary(measles_model)
      - Susceptible              1.00  0.00     -     -     -     -     -     -     -     -     -     -
      - Latent                      -  0.96  0.04     -     -     -     -     -     -     -     -     -
      - Prodromal                   -     -  0.33  0.67     -     -     -     -     -     -     -     -
-     - Rash                        -     -     -  0.33     -     -     -     -     -     -     -  0.67
-     - Isolated                    -     -     -     -     -     -     -     -     -     -     -     -
+     - Rash                        -     -     -  0.50  0.25     -     -     -     -     -     -  0.25
+     - Isolated                    -     -     -     -     -     -     -     -     -     -     -  1.00
      - Isolated Recovered          -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Latent          -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Susceptible     -     -     -     -     -     -     -     -     -     -     -     -
@@ -389,7 +416,7 @@ reproductive <- reproductive[(source != -1) & source_exposure_date == 0]
 reproductive[, mean(rt)]
 ```
 
-    [1] 2.734
+    [1] 2.578
 
 ``` r
 reproductive[, median(rt)]
@@ -401,7 +428,7 @@ reproductive[, median(rt)]
 reproductive[rt > 0, mean(rt)]
 ```
 
-    [1] 3.473952
+    [1] 3.356771
 
 ``` r
 hist(
@@ -495,7 +522,7 @@ text(
 
 ![](r0_9-epistorm_FALSE-rash_contact_redux_0.50-isolation_willingness_0.0-quarantine_willingness_0.9-contact_tracing_success_0.00_files/figure-commonmark/hist-outbreak-size-1.png)
 
-The probability of a large outbreak (more than 100 cases) is 73.4%.
+The probability of a large outbreak (more than 100 cases) is 70.9%.
 
 ## Hospitalizations
 
@@ -595,9 +622,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 41.00s (2000 runs)
-    Last run speed      : 15.97 million agents x day / second
-    Average run speed   : 102.95 million agents x day / second
+    Total elapsed t     : 30.00s (2000 runs)
+    Last run speed      : 23.78 million agents x day / second
+    Average run speed   : 140.21 million agents x day / second
     Rewiring            : off
     Last seed used      : 321912252
 
@@ -623,7 +650,7 @@ summary(measles_model)
      - Prodromal period                : 4.0000
      - Quarantine period               : -1.0000
      - Quarantine willingness          : 0.9000
-     - Rash period                     : 3.0000
+     - Rash period                     : 4.0000
      - Rash reduction contact rate     : 0.5000
      - Transmission rate               : 0.2000
      - Vaccination rate                : 0.0e+00
@@ -647,14 +674,14 @@ summary(measles_model)
      - Susceptible              1.00  0.00     -     -     -     -     -     -     -     -     -     -
      - Latent                      -  0.96  0.04     -     -     -     -     -     -     -     -     -
      - Prodromal                   -     -  0.33  0.67     -     -     -     -     -     -     -     -
-     - Rash                        -     -     -  0.33     -     -     -     -     -     -     -  0.67
-     - Isolated                    -     -     -     -     -     -     -     -     -     -     -     -
+     - Rash                        -     -     -  0.50  0.25     -     -     -     -     -     -  0.25
+     - Isolated                    -     -     -     -     -     -     -     -     -     -  1.00     -
      - Isolated Recovered          -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Latent          -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Susceptible     -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Prodromal       -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Recovered       -     -     -     -     -     -     -     -     -     -     -     -
-     - Hospitalized                -     -     -     -     -     -     -     -     -     -     -     -
+     - Hospitalized                -     -     -     -     -     -     -     -     -     -  0.86  0.14
      - Recovered                   -     -     -     -     -     -     -     -     -     -     -  1.00
 
 Like before, we can extract the results using the
@@ -706,7 +733,7 @@ legend(
 ![](r0_9-epistorm_FALSE-rash_contact_redux_0.50-isolation_willingness_0.0-quarantine_willingness_0.9-contact_tracing_success_0.00_files/figure-commonmark/compare-scenarios-1.png)
 
 The probability of observing an outbreak of more than 100 cases is
-73.40% with quarantine, and 73.40% without quarantine. So, although
+70.90% with quarantine, and 69.90% without quarantine. So, although
 mild, the quarantine process seems to have an effect in the outbreak
 size, with a higher number of cases observed in the scenario without
 quarantine.

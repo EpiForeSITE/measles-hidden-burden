@@ -1,4 +1,5 @@
 library(data.table)
+library(measles)
 
 age_limits <- seq(from = 0, to = 80, by = 5) 
 
@@ -118,7 +119,7 @@ for (n in seq_len(nrow(ages))) {
 
 }
 
-data(short_creek_matrix, package = "measles")
+data(short_creek, package = "measles")
 dimnames(short_creek_epistorm) <- dimnames(short_creek_matrix)
 
 # Now, for the schools, we ensure that 80% of their contacts are
@@ -133,8 +134,13 @@ for (n in schools) {
 
 data(short_creek, package = "measles")
 
+sc <- short_creek_epistorm
+sc2 <- make_cmat_symmetric(sc, short_creek$agepops)
+
+# Validating symmetry
+sc2 * short_creek$agepops
 
 saveRDS(
-  short_creek_epistorm,
+  sc2,
   file = file.path("data", "short_creek_epistorm.rds")
   )

@@ -21,7 +21,7 @@ if (!exists("params")) {
     r0 = 9,
     nsims = 1000,
     threads = 8,
-    epistorm = FALSE,
+    epistorm = TRUE,
     rash_contact_redux = 0.0,
     isolation_willingness = 1.0,
     quarantine_willingness = 0.9,
@@ -135,7 +135,7 @@ While the decision to calibrate the contact matrix or the transmission probabili
 r0 <- params$r0
 
 # Figuring out the duration
-total_duration <- 4 + 1/(h_rate + 1/3)
+total_duration <- 4 + 1/(h_rate + 1/4)
 
 scaling_factor <- calibrate_mixing_model(
   contact_matrix = short_creek_matrix,
@@ -144,6 +144,46 @@ scaling_factor <- calibrate_mixing_model(
   transmission_prob = 0.2
 )
 ```
+
+We can inspect how the total number of contacts change after scaling the contact matrix:
+
+```{r}
+#| label: inspect-scaling
+#| echo: false
+contact_table <-data.frame(
+  Group = short_creek$age_labels,
+  Size = short_creek$agepops,
+  Vax  = short_creek$vacc_rate,
+  "Contacts before scaling" = rowSums(short_creek_matrix * short_creek$agepops),
+  "Contacts after scaling" = rowSums(short_creek_matrix * scaling_factor * short_creek$agepops),
+  check.names = FALSE
+)
+
+contact_table <- rbind(
+  contact_table,
+  data.frame(
+    Group = "Total",
+    Size = sum(short_creek$agepops),
+    Vax  = sum(short_creek$vacc_rate * short_creek$agepops) / sum(short_creek$agepops),
+    "Contacts before scaling" = sum(rowSums(short_creek_matrix * short_creek$agepops)),
+    "Contacts after scaling" = sum(rowSums(short_creek_matrix * scaling_factor * short_creek$agepops)),
+    check.names = FALSE
+  )
+)
+
+contact_table |>
+  knitr::kable(
+    caption = paste0(
+      "Total number of contacts before and after scaling the contact matrix. ",
+      "The total contacts are computed by multiplying the contact matrix ",
+      "by the population size of each age group, and then summing across ",
+      "rows. Scaling factor: ", round(scaling_factor, 4)
+    ),
+    digits = 2,
+    row.names = FALSE
+  )
+```
+
 
 ```{r}
 #| label: create-model
@@ -163,7 +203,7 @@ measles_model <- ModelMeaslesMixing(
   contact_tracing_success_rate = params$contact_tracing_success,
   contact_tracing_days_window  = 4,
   # Disease paramters
-  rash_period                  = 3,
+  rash_period                  = 4,
   prodromal_period             = 4,
   hospitalization_rate         = h_rate,
   hospitalization_period       = 7,

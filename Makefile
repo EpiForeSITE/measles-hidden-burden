@@ -28,8 +28,8 @@ report:
 		if [ ! -d "$(TARGET_DIR)" ]; then \
 			mkdir -p $(TARGET_DIR); \
 		fi; \
-		if [ ! -f "$(TARGET_DIR)/data" ]; then \
-			cd $(TARGET_DIR) && ln -s ../data data && cd ..; \
+		if [ ! -e "$(TARGET_DIR)/data" ]; then \
+			ln -s ../data $(TARGET_DIR)/data; \
 		fi; \
 		cp template.qmd $(TARGET_DIR)/$(REPORT_NAME).qmd && \
 		quarto render $(TARGET_DIR)/$(REPORT_NAME).qmd \
