@@ -13,7 +13,7 @@ TARGET_DIR ?= scenarios
 R0_VALUES = 5 7 9
 
 # Main target to run the paper models
-main:
+scenarios:
 	@for r0 in $(R0_VALUES); do \
 		R0=$$r0 RASH_CONTACT_REDUX=0.00 QT_SUCCESS=0.00  make report && \
 		R0=$$r0 RASH_CONTACT_REDUX=0.50 QT_SUCCESS=0.00  make report && \
@@ -46,7 +46,7 @@ clean:
 	rm -rf $(TARGET_DIR)/*.rds $(TARGET_DIR)/*.md $(TARGET_DIR)/*_files
 
 # Alias
-sensitivity_r0: main
+sensitivity_r0: scenarios
 
 # All sensitivity analysis
 sensitivity_analysis: sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux
@@ -54,7 +54,7 @@ sensitivity_analysis: sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux
 PROB_VALUES = 0.0 0.25 0.5 0.75 1.0
 
 sensitivity_epistorm:
-	TARGET_DIR=sensitivity_epistorm EPISTORM=TRUE $(MAKE) main
+	TARGET_DIR=sensitivity_epistorm EPISTORM=TRUE $(MAKE) scenarios
 
 sensitivity_rash_redux:
 	for prob0 in $(PROB_VALUES); do \
@@ -67,4 +67,4 @@ sensitivity_rash_redux:
 		done; \
 	done
 
-.PHONY: main report clean sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux sensitivity_analysis
+.PHONY: scenarios report clean sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux sensitivity_analysis

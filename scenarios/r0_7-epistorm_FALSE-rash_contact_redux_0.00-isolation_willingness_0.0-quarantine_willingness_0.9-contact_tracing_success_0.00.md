@@ -322,9 +322,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 20.00s (1000 runs)
-    Last run speed      : 25.07 million agents x day / second
-    Average run speed   : 106.97 million agents x day / second
+    Total elapsed t     : 14.00s (1000 runs)
+    Last run speed      : 22.94 million agents x day / second
+    Average run speed   : 149.26 million agents x day / second
     Rewiring            : off
     Last seed used      : 321912252
 
@@ -622,9 +622,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 38.00s (2000 runs)
-    Last run speed      : 21.52 million agents x day / second
-    Average run speed   : 112.71 million agents x day / second
+    Total elapsed t     : 30.00s (2000 runs)
+    Last run speed      : 22.93 million agents x day / second
+    Average run speed   : 140.97 million agents x day / second
     Rewiring            : off
     Last seed used      : 321912252
 
