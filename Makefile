@@ -10,7 +10,7 @@ Q_WILL ?= 0.9
 QT_SUCCESS ?= 0.8
 TARGET_DIR ?= scenarios
 
-R0_VALUES = 5 7 9
+R0_VALUES = 5 7 9 11 13 15 17
 
 # Main target to run the paper models
 scenarios:

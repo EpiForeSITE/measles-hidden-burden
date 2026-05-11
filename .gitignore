@@ -4,3 +4,9 @@
 *.Rhistory
 *.RData
 sensitivity_*/
+
+# We are explicitly excluding these, since top
+# level files are not intended to be included
+# in the repository.
+*.qmd
+*.R
