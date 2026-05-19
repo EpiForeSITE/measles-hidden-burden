@@ -161,11 +161,13 @@ plotEBSP <- function(fileName, date, burnin=0.1, isLinear=TRUE, useHPD=TRUE, sho
     res$allYears <- as.numeric(format(MRSD_date, "%Y")) - res$allTimes
     res$allCalendarDates <- MRSD_date - (res$allTimes*365.25)
     
-    generation_time <- 14/365
-    res$Nmedian <- res$Nmedian / generation_time
-    res$NlowerCPD <- res$NlowerCPD / generation_time
-    res$NupperCPD <- res$NupperCPD / generation_time
-    res$changePops <- lapply(res$changePops, function(x) x / generation_time)
+    sigma <- (1/9)+(1/0.34)+1
+    generation_time <- 11.9/365 
+    factor <- sigma/generation_time
+    res$Nmedian <- res$Nmedian*factor
+    res$NlowerCPD <- res$NlowerCPD*factor
+    res$NupperCPD <- res$NupperCPD*factor
+    res$changePops <- lapply(res$changePops, function(x) x *factor)
     
     ellipsis <- list()
 
