@@ -60,8 +60,11 @@ For the data, we need two datasets: information about the population distributio
 
 ```{r}
 #| label: data
-# The results require measles >= 0.4.1 (epiworldR >= 0.19.0)
-stopifnot(packageVersion("measles") >= "0.4.1")
+# The results require measles >= 0.4.1 and epiworldR >= 0.19.0-1
+stopifnot(
+  packageVersion("measles") >= "0.4.1",
+  packageVersion("epiworldR") >= "0.19.0.1" # For clone_epi()
+)
 data(short_creek, package = "measles")
 data(short_creek_matrix, package = "measles")
 ```
@@ -89,7 +92,7 @@ vax_rate <- with(short_creek, sum(vacc_rate * agepops) / sum(agepops))
 n_unvax <- (1 - vax_rate) * sum(short_creek$agepops)
 ```
 
-As we can see, the vaccination rates in this area are significantly low. The immunity needed to avert an outbreak is close to 93% of the population. The column `vacc_rate` is the share of each group that is vaccinated (since measles 0.4.1; the model applies the vaccine efficacy, 97%). The overall vaccination rate is `r vax_rate * 100`%, meaning that `r n_unvax` people are unvaccinated. Let's now look at the first few entries of the contact matrix
+As we can see, the vaccination rates in this area are significantly low. The immunity needed to avert an outbreak is close to 93% of the population. The column `vacc_rate` is the share of each group that is vaccinated (since measles 0.4.1; the model applies the vaccine efficacy, see below). The overall vaccination rate is `r vax_rate * 100`%, meaning that `r n_unvax` people are unvaccinated. Let's now look at the first few entries of the contact matrix
 
 ```{r}
 #| label: data-peak-matrix
@@ -195,7 +198,8 @@ measles_model <- ModelMeaslesMixing(
   prevalence                   = 1 / N,
   transmission_rate            = 0.2,
   # short_creek$vacc_rate is the vaccination coverage (measles >= 0.4.1),
-  # so the efficacy is applied here, once.
+  # so the efficacy is applied here, once (see the groups with a different
+  # efficacy below).
   vax_efficacy                 = 0.97,
   contact_matrix               = short_creek_matrix * scaling_factor,
   prop_vaccinated              = 0.0, # This is modified later
@@ -233,18 +237,42 @@ add_entities_from_dataframe(
 
 We can also specify the vaccination rates. There are multiple ways in which we can do that. The default behavior of the model is, at each run, randomly sample `prop_vaccinated` percent of the population and assign the vaccine. Thus, the number of vaccinated individuals will be constant across simulations. Nonetheless, since the schools and age groups have different vaccination rates, it is better to use the `distribute_tool_to_entities()` function. Like the `add_entities_from_dataframe()` function, the `distribute_tool_to_entities()` function simplifies the process:
 
+The MMR vaccine of the model is all-or-nothing: each vaccinated agent is fully protected with probability equal to the efficacy (97%), and not protected otherwise. As in the [`multigroup.vaccine`](https://github.com/EpiForeSITE/multigroup-vaccine) analysis this data comes from, the efficacy is 93% for children under age 5, and those aged 70 and older are assumed to be immune. We create a copy of the model's vaccine for each of these groups with `clone_epi()` (so they are all-or-nothing as well), and give each group its own vaccine:
+
 ```{r}
 #| label: distribute-tool
-# Creating the distribution function
-dist_fun <- distribute_tool_to_entities(
-  prevalence = short_creek$vacc_rate,
-  as_proportion = TRUE
+# Vaccine efficacy by group
+group_efficacy <- rep(0.97, nrow(short_creek))
+group_efficacy[short_creek$age_labels %in% c("under1", "1to4")] <- 0.93
+group_efficacy[short_creek$age_labels == "70+"] <- 1
+
+# The model's MMR vaccine (97%) goes to the other groups
+mmr <- get_tool(measles_model, 0)
+set_distribution_tool(
+  mmr,
+  distribute_tool_to_entities(
+    prevalence = short_creek$vacc_rate * (group_efficacy == 0.97),
+    as_proportion = TRUE
+  )
 )
 
-# Setting the distribution function
-measles_model |>
-  get_tool(0) |>
-  set_distribution_tool(dist_fun)
+# Copies of the vaccine for the under-5s and those aged 70+
+for (eff in c(0.93, 1)) {
+
+  mmr_copy <- clone_epi(mmr)
+  set_name_tool(mmr_copy, sprintf("MMR (efficacy %.2f)", eff))
+  set_susceptibility_reduction(mmr_copy, eff)
+  set_distribution_tool(
+    mmr_copy,
+    distribute_tool_to_entities(
+      prevalence = short_creek$vacc_rate * (group_efficacy == eff),
+      as_proportion = TRUE
+    )
+  )
+
+  add_tool(measles_model, mmr_copy)
+
+}
 ```
 
 Now, we can specify what to record from the simulation.
@@ -402,7 +430,8 @@ The weights attribute is to ensure that we take into consideration counting indi
 #| label: hospitalizations
 hosp_tot <- hospitalizations[, .(total = sum(count)), by = .(sim_num, tool_id)]
 hosp_tot[, status := fifelse(tool_id == -1, "Unvax", "Vax")]
-hosp_tot[, tool_id := NULL]
+# There is one vaccine per efficacy level, so we add them up
+hosp_tot <- hosp_tot[, .(total = sum(total)), by = .(sim_num, status)]
 ```
 
 We can create a couple of boxplot to show how many cases we see per vaccination status:
