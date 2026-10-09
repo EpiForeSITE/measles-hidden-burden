@@ -89,7 +89,7 @@ vax_rate <- with(short_creek, sum(vacc_rate * agepops) / sum(agepops))
 n_unvax <- (1 - vax_rate) * sum(short_creek$agepops)
 ```
 
-As we can see, the vaccination rates in this area are significantly low. The immunity needed to avert an outbreak is close to 93% of the population. The column `vacc_rate` is the share of each group that is immune (vaccinated times the vaccine efficacy, 0.97, or 0.93 under age 5). The overall share immune is `r vax_rate * 100`%, meaning that `r n_unvax` people are not immune. Let's now look at the first few entries of the contact matrix
+As we can see, the vaccination rates in this area are significantly low. The immunity needed to avert an outbreak is close to 93% of the population. The column `vacc_rate` is the share of each group that is vaccinated (since measles 0.4.1; the model applies the vaccine efficacy, 97%). The overall vaccination rate is `r vax_rate * 100`%, meaning that `r n_unvax` people are unvaccinated. Let's now look at the first few entries of the contact matrix
 
 ```{r}
 #| label: data-peak-matrix
@@ -194,9 +194,9 @@ measles_model <- ModelMeaslesMixing(
   n                            = N,
   prevalence                   = 1 / N,
   transmission_rate            = 0.2,
-  # short_creek$vacc_rate is the share *immune* (vaccinated x efficacy, by
-  # age group), so the vaccine efficacy is already accounted for there.
-  vax_efficacy                 = 1,
+  # short_creek$vacc_rate is the vaccination coverage (measles >= 0.4.1),
+  # so the efficacy is applied here, once.
+  vax_efficacy                 = 0.97,
   contact_matrix               = short_creek_matrix * scaling_factor,
   prop_vaccinated              = 0.0, # This is modified later
   # Quarantine and isolation parameters
