@@ -65,7 +65,7 @@ Each report runs two scenarios: with quarantine (21 days) and without quarantine
 | Hospitalization period (`hospitalization_period`) | 7 days | Assumption. |
 | Days undetected (`days_undetected`) | 2 days | Assumption: on average, it takes about two days to detect a case. |
 | Quarantine period (`quarantine_period`) | 21 days; −1 (no quarantine) in the comparison scenario | Utah DHHS plan: 21 days since last exposure. The no-quarantine scenario uses `set_param(measles_model, "Quarantine period", -1)`. |
-| Quarantine willingness (`quarantine_willingness`) | 0.9 | Assumption (field experience). |
+| Quarantine willingness (`quarantine_willingness`) | 0.9 | Assumption. |
 | Isolation willingness (`isolation_willingness`) | 0.0 (`ISO_WILL` in the Makefile) | Assumption. The behavior of cases with rash is represented by `rash_reduction_contact_rate`. |
 | Isolation period (`isolation_period`) | 4 days | Utah DHHS plan: isolate until 4 days after rash onset. |
 | Contact-tracing success (`contact_tracing_success_rate`) | 0, 0 or 0.25, paired with rash contact reduction 0, 0.5 and 0.75; 0–1 in the sensitivity analysis | Assumption. |
