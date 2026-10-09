@@ -2,15 +2,21 @@
 
 The Epistorm data was downloaded from this link: "https://raw.githubusercontent.com/epistorm/Epistorm-Mix/05966ba49c7b49fb1cd902d6b98b3be0bb2785a8/matrices/M_matrix/Total-M-by5_80-matrix.csv"
 
-The contact matrix was first adjusted to reflect the age distribution of the study region. Because our model treats individual schools as distinct population blocks, we further modified contact rates for school-age individuals, assuming that 80% of contacts among school-age agents occur within their own school. Overall contact rates were preserved but redistributed to reflect this within-school concentration.
+[`epistorm_matrix.R`](./epistorm_matrix.R) builds the Epistorm-Mix contact matrix for the model's 15 groups with the same method used for the POLYMOD matrix in the `measles` package (`multigroup.vaccine::contactMatrixAgeSchool()`):
 
-Since the Epistorm contact matrix uses five-year age intervals (0–4, 5–9, 10–14, etc.), we mapped it to our model's age groups using a weighted average. For any model age group spanning multiple Epistorm intervals, the effective contact rate was computed as a weighted average across overlapping intervals, with weights proportional to the number of ages from each interval represented in the model group. For example, a school enrolling students aged 6–11 spans two Epistorm intervals—(5–9) and (10–14)—contributing 4 and 2 ages, respectively. If the total contact rates for those intervals are $X$ and $Y$, the effective contact rate for the 6–11 age group is:
+1. **Single years of age.** The 5-year Epistorm matrix is expanded to single years of age (each 5-year column is divided evenly among its ages).
+2. **Model age groups.** The matrix is collapsed to the 9 model age groups (under 1, 1–4, 5–11, 12–13, 14–17, 18–24, 25–44, 45–69, 70+): for each pair of groups, the contacts are summed over the column ages and averaged over the row ages. For example, a group spanning ages 6–11 covers 4 ages of the (5–9) interval and 2 of the (10–14) interval; if their contact rates are $X$ and $Y$, the group's rate is:
 
-```math
-\frac{4X + 2Y}{6}
-```
+   ```math
+   \frac{4X + 2Y}{6}
+   ```
 
-The file [**epistorm_matrix.R**](./epistorm_matrix.R) contains the exact code used to implement this.
+3. **Reciprocity.** The age matrix is made reciprocal for the study population (2024 Census age counts for Hildale UT, Colorado City AZ and Centennial Park AZ, via `multigroup.vaccine`) with `measles::make_cmat_symmetric()`, so that the total contacts from group *i* to group *j* equal those from *j* to *i*.
+4. **Schools.** Each school-age group (5–11, 12–13 and 14–17) is split into its three schools (`contactMatrixAgeSchool2()`, adapted from `multigroup.vaccine::contactMatrixAgeSchool()`):
+   - contacts of other groups with a school-age group are divided among its schools in proportion to their enrollment, rescaled to the census age counts;
+   - within an age group, 70% of contacts are with the agent's own school (`schportion = 0.7`), and the rest are spread across the schools of that age group in proportion to their size.
+
+The script checks that the result is reciprocal and has the same dimensions as `measles::short_creek_matrix`, and saves it to `short_creek_epistorm.rds`.
 
 ## References
 
