@@ -60,10 +60,12 @@ For the data, we need two datasets: information about the population distributio
 
 ```{r}
 #| label: data
-# The results require measles >= 0.4.1 and epiworldR >= 0.19.0-1
+# The results require measles >= 0.4.1 and epiworldR >= 0.19.0 (with
+# clone_epi())
 stopifnot(
   packageVersion("measles") >= "0.4.1",
-  packageVersion("epiworldR") >= "0.19.0.1" # For clone_epi()
+  packageVersion("epiworldR") >= "0.19.0",
+  exists("clone_epi", envir = asNamespace("epiworldR"))
 )
 data(short_creek, package = "measles")
 data(short_creek_matrix, package = "measles")
