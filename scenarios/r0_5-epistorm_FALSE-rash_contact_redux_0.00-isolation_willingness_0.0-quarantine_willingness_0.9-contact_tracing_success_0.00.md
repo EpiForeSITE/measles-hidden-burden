@@ -1,5 +1,5 @@
 George G. Vega Yon, Ph.D.
-2026-05-08
+2026-10-09
 
 # Scenario of Utah-Arizona Border Measles Outbreak (R0 = 5)
 
@@ -44,12 +44,7 @@ library(measles)
     You can find the citation information by running
       citation("epiworldR")
 
-
-    Attaching package: 'measles'
-
-    The following objects are masked from 'package:epiworldR':
-
-        get_contact_matrix, set_contact_matrix
+    Using measles in your research? Please cite it: citation("measles")
 
 For the data, we need two datasets: information about the population
 distribution by age and vaccination status, and the contact matrix. The
@@ -64,6 +59,11 @@ those age groups. We can load the needed data using the `data()`
 function:
 
 ``` r
+# The results require measles >= 0.4.1 and epiworldR >= 0.19.0-1
+stopifnot(
+  packageVersion("measles") >= "0.4.1",
+  packageVersion("epiworldR") >= "0.19.0.1" # For clone_epi()
+)
 data(short_creek, package = "measles")
 data(short_creek_matrix, package = "measles")
 ```
@@ -84,26 +84,28 @@ short_creek
 
        age_labels agepops agelims  vacc_rate
     1      under1     141       1 0.00000000
-    2        1to4     562       4 0.26512456
-    3     5to11s1     296      11 0.06081081
-    4     5to11s2     414      11 0.35748792
-    5     5to11s3     225      11 0.40888889
-    6    12to13s4      94      13 0.22340426
-    7    12to13s5     164      13 0.35365854
-    8    12to13s6      92      13 0.57608696
-    9    14to17s7     166      17 0.22891566
-    10   14to17s8     158      17 0.36075949
-    11   14to17s9     299      17 0.44147157
-    12     18to24     817      24 0.36474908
-    13     25to44    1391      44 0.64270309
-    14     45to69    1016      69 0.92125984
+    2        1to4     562       4 0.28556150
+    3     5to11s1     296      11 0.06418919
+    4     5to11s2     414      11 0.36956522
+    5     5to11s3     225      11 0.42222222
+    6    12to13s4      94      13 0.23404255
+    7    12to13s5     164      13 0.36585366
+    8    12to13s6      92      13 0.59782609
+    9    14to17s7     166      17 0.23493976
+    10   14to17s8     158      17 0.37341772
+    11   14to17s9     299      17 0.45484950
+    12     18to24     817      24 0.37560193
+    13     25to44    1391      44 0.66280096
+    14     45to69    1016      69 0.95000000
     15        70+      80      90 1.00000000
 
 As we can see, the vaccination rates in this area are significantly low.
-The vaccination rate needed to avert an outbreak is close to the 0.93
-percent of the population. The overall vaccination rate is 50.2789518%,
-meaning that 2941 people are unvaccinated. Let’s now look at the first
-few entries of the contact matrix
+The immunity needed to avert an outbreak is close to 93% of the
+population. The column `vacc_rate` is the share of each group that is
+vaccinated (since measles 0.4.1; the model applies the vaccine efficacy,
+see below). The overall vaccination rate is 51.9443529%, meaning that
+2842.4915252 people are unvaccinated. Let’s now look at the first few
+entries of the contact matrix
 
 ``` r
 # Looking at the first 5 columns
@@ -147,10 +149,12 @@ a probability, so, to match a 10% hospitalization probability, we need
 to do some calculations. The hospitalization probability is given by the
 following formula:
 
-$$P(\text{hospitalization}) = \frac{\text{hospitalization}_\text{rate}}{\text{hospitalization}_\text{rate} + \text{recovery}_\text{rate}}$$
+$$
+P(\text{hospitalization}) = \frac{\text{hospitalization}_\text{rate}}{\text{hospitalization}_\text{rate} + \text{recovery}_\text{rate}}
+$$
 
 Where the $\text{recovery}_\text{rate}$ is given by the rash period
-(1/duration of it, three days in this simulation). Programatically, we
+(1/duration of it, four days in this simulation). Programatically, we
 can do the following:
 
 ``` r
@@ -162,7 +166,8 @@ N <- sum(short_creek$agepops)
 #   => hosp_r = P(hosp) (hosp_r + rec_r)
 #             = P(hosp) * hosp_r + P(hosp) * rec_r
 #   => hosp_r = P(hosp) * rec_r / (1 - P(hosp))
-h_rate <- 0.1 * (1 / 3) / (1 - 0.1)
+rash_period <- 4
+h_rate <- 0.1 * (1 / rash_period) / (1 - 0.1)
 ```
 
 For calibration, we can make use of the function
@@ -182,7 +187,7 @@ consistent with the literature on measles.
 r0 <- params$r0
 
 # Figuring out the duration
-total_duration <- 4 + 1/(h_rate + 1/4)
+total_duration <- 4 + 1/(h_rate + 1/rash_period)
 
 scaling_factor <- calibrate_mixing_model(
   contact_matrix = short_creek_matrix,
@@ -197,33 +202,36 @@ contact matrix:
 
 | Group    | Size |  Vax | Contacts before scaling | Contacts after scaling |
 |:---------|-----:|-----:|------------------------:|-----------------------:|
-| under1   |  141 | 0.00 |                  977.14 |                 126.74 |
-| 1to4     |  562 | 0.27 |                 8129.27 |                1054.39 |
-| 5to11s1  |  296 | 0.06 |                 7479.17 |                 970.07 |
-| 5to11s2  |  414 | 0.36 |                10460.73 |                1356.78 |
-| 5to11s3  |  225 | 0.41 |                 5685.18 |                 737.38 |
-| 12to13s4 |   94 | 0.22 |                 3231.66 |                 419.15 |
-| 12to13s5 |  164 | 0.35 |                 5638.21 |                 731.29 |
-| 12to13s6 |   92 | 0.58 |                 3162.90 |                 410.24 |
-| 14to17s7 |  166 | 0.23 |                 5386.77 |                 698.68 |
-| 14to17s8 |  158 | 0.36 |                 5127.16 |                 665.00 |
-| 14to17s9 |  299 | 0.44 |                 9702.67 |                1258.46 |
-| 18to24   |  817 | 0.36 |                15068.88 |                1954.47 |
-| 25to44   | 1391 | 0.64 |                20659.71 |                2679.61 |
-| 45to69   | 1016 | 0.92 |                 9913.69 |                1285.83 |
-| 70+      |   80 | 1.00 |                  343.18 |                  44.51 |
-| Total    | 5915 | 0.50 |               110966.31 |               14392.59 |
+| under1   |  141 | 0.00 |                  977.14 |                 124.80 |
+| 1to4     |  562 | 0.29 |                 8129.27 |                1038.27 |
+| 5to11s1  |  296 | 0.06 |                 7479.17 |                 955.24 |
+| 5to11s2  |  414 | 0.37 |                10460.73 |                1336.05 |
+| 5to11s3  |  225 | 0.42 |                 5685.18 |                 726.11 |
+| 12to13s4 |   94 | 0.23 |                 3231.66 |                 412.75 |
+| 12to13s5 |  164 | 0.37 |                 5638.21 |                 720.11 |
+| 12to13s6 |   92 | 0.60 |                 3162.90 |                 403.97 |
+| 14to17s7 |  166 | 0.23 |                 5386.77 |                 688.00 |
+| 14to17s8 |  158 | 0.37 |                 5127.16 |                 654.84 |
+| 14to17s9 |  299 | 0.45 |                 9702.67 |                1239.23 |
+| 18to24   |  817 | 0.38 |                15068.88 |                1924.60 |
+| 25to44   | 1391 | 0.66 |                20659.71 |                2638.67 |
+| 45to69   | 1016 | 0.95 |                 9913.69 |                1266.18 |
+| 70+      |   80 | 1.00 |                  343.18 |                  43.83 |
+| Total    | 5915 | 0.52 |               110966.31 |               14172.67 |
 
 Total number of contacts before and after scaling the contact matrix.
 The total contacts are computed by multiplying the contact matrix by the
 population size of each age group, and then summing across rows. Scaling
-factor: 0.1297
+factor: 0.1277
 
 ``` r
 measles_model <- ModelMeaslesMixing(
   n                            = N,
   prevalence                   = 1 / N,
   transmission_rate            = 0.2,
+  # short_creek$vacc_rate is the vaccination coverage (measles >= 0.4.1),
+  # so the efficacy is applied here, once (see the groups with a different
+  # efficacy below).
   vax_efficacy                 = 0.97,
   contact_matrix               = short_creek_matrix * scaling_factor,
   prop_vaccinated              = 0.0, # This is modified later
@@ -236,7 +244,7 @@ measles_model <- ModelMeaslesMixing(
   contact_tracing_success_rate = params$contact_tracing_success,
   contact_tracing_days_window  = 4,
   # Disease paramters
-  rash_period                  = 4,
+  rash_period                  = rash_period,
   prodromal_period             = 4,
   hospitalization_rate         = h_rate,
   hospitalization_period       = 7,
@@ -270,17 +278,49 @@ different vaccination rates, it is better to use the
 `add_entities_from_dataframe()` function, the
 `distribute_tool_to_entities()` function simplifies the process:
 
+The MMR vaccine of the model is all-or-nothing: each vaccinated agent is
+fully protected with probability equal to the efficacy (97%), and not
+protected otherwise. As in the
+[`multigroup.vaccine`](https://github.com/EpiForeSITE/multigroup-vaccine)
+analysis this data comes from, the efficacy is 93% for children under
+age 5, and those aged 70 and older are assumed to be immune. We create a
+copy of the model’s vaccine for each of these groups with `clone_epi()`
+(so they are all-or-nothing as well), and give each group its own
+vaccine:
+
 ``` r
-# Creating the distribution function
-dist_fun <- distribute_tool_to_entities(
-  prevalence = short_creek$vacc_rate,
-  as_proportion = TRUE
+# Vaccine efficacy by group
+group_efficacy <- rep(0.97, nrow(short_creek))
+group_efficacy[short_creek$age_labels %in% c("under1", "1to4")] <- 0.93
+group_efficacy[short_creek$age_labels == "70+"] <- 1
+
+# The model's MMR vaccine (97%) goes to the other groups
+mmr <- get_tool(measles_model, 0)
+set_distribution_tool(
+  mmr,
+  distribute_tool_to_entities(
+    prevalence = short_creek$vacc_rate * (group_efficacy == 0.97),
+    as_proportion = TRUE
+  )
 )
 
-# Setting the distribution function
-measles_model |>
-  get_tool(0) |>
-  set_distribution_tool(dist_fun)
+# Copies of the vaccine for the under-5s and those aged 70+
+for (eff in c(0.93, 1)) {
+
+  mmr_copy <- clone_epi(mmr)
+  set_name_tool(mmr_copy, sprintf("MMR (efficacy %.2f)", eff))
+  set_susceptibility_reduction(mmr_copy, eff)
+  set_distribution_tool(
+    mmr_copy,
+    distribute_tool_to_entities(
+      prevalence = short_creek$vacc_rate * (group_efficacy == eff),
+      as_proportion = TRUE
+    )
+  )
+
+  add_tool(measles_model, mmr_copy)
+
+}
 ```
 
 Now, we can specify what to record from the simulation.
@@ -322,9 +362,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 18.00s (1000 runs)
-    Last run speed      : 20.79 million agents x day / second
-    Average run speed   : 113.74 million agents x day / second
+    Total elapsed t     : 11.00s (1000 runs)
+    Last run speed      : 37.21 million agents x day / second
+    Average run speed   : 193.22 million agents x day / second
     Rewiring            : off
     Last seed used      : 321912252
 
@@ -336,6 +376,8 @@ summary(measles_model)
 
     Tool(s):
      - MMR
+     - MMR (efficacy 0.93)
+     - MMR (efficacy 1.00)
 
     Model parameters:
      - (IGNORED) Vax improved recovery : 0.5000
@@ -343,7 +385,7 @@ summary(measles_model)
      - Contact tracing success rate    : 0.0e+00
      - Days undetected                 : 2.0000
      - Hospitalization period          : 7.0000
-     - Hospitalization rate            : 0.0370
+     - Hospitalization rate            : 0.0278
      - Incubation period               : 12.0000
      - Isolation period                : 4.0000
      - Isolation willingness           : 0.0e+00
@@ -357,7 +399,7 @@ summary(measles_model)
      - Vax efficacy                    : 0.9700
 
     Distribution of the population at time 365:
-      - ( 0) Susceptible             : 5914 -> 3664
+      - ( 0) Susceptible             : 5914 -> 5909
       - ( 1) Latent                  :    1 -> 0
       - ( 2) Prodromal               :    0 -> 0
       - ( 3) Rash                    :    0 -> 0
@@ -368,20 +410,20 @@ summary(measles_model)
       - ( 8) Quarantined Prodromal   :    0 -> 0
       - ( 9) Quarantined Recovered   :    0 -> 0
       - (10) Hospitalized            :    0 -> 0
-      - (11) Recovered               :    0 -> 2251
+      - (11) Recovered               :    0 -> 6
 
     Transition Probabilities:
      - Susceptible              1.00  0.00     -     -     -     -     -     -     -     -     -     -
-     - Latent                      -  0.92  0.08     -     -     -     -     -     -     -     -     -
-     - Prodromal                   -     -  0.75  0.25     -     -     -     -     -     -     -     -
-     - Rash                        -     -     -  0.37  0.35  0.12     -     -     -     -  0.04  0.12
-     - Isolated                    -     -     -  0.33  0.40  0.14     -     -     -     -  0.04  0.10
-     - Isolated Recovered          -     -     -     -     -  0.45     -     -     -     -     -  0.55
+     - Latent                      -  0.82  0.18     -     -     -     -     -     -     -     -     -
+     - Prodromal                   -     -  0.68  0.32     -     -     -     -     -     -     -     -
+     - Rash                        -     -     -  0.25  0.62  0.12     -     -     -     -     -     -
+     - Isolated                    -     -     -     -  0.55  0.18     -     -     -     -  0.09  0.18
+     - Isolated Recovered          -     -     -     -     -  0.40     -     -     -     -     -  0.60
      - Quarantined Latent          -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Susceptible     -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Prodromal       -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Recovered       -     -     -     -     -     -     -     -     -     -     -     -
-     - Hospitalized                -     -     -     -     -     -     -     -     -     -  0.85  0.15
+     - Hospitalized                -     -     -     -     -     -     -     -     -     -  0.80  0.20
      - Recovered                   -     -     -     -     -     -     -     -     -     -     -  1.00
 
 To retrieve the results, we use the `run_multiple_get_results()`
@@ -402,6 +444,11 @@ to manipulate the information.
 ``` r
 # Converting into data.table format for convenience
 library(data.table)
+```
+
+    Warning: package 'data.table' was built under R version 4.5.2
+
+``` r
 outbreak_size <- ans$outbreak_size |> as.data.table()
 hospitalizations <- ans$hospitalizations |> as.data.table()
 reproductive <- ans$reproductive |> as.data.table()
@@ -416,7 +463,7 @@ reproductive <- reproductive[(source != -1) & source_exposure_date == 0]
 reproductive[, mean(rt)]
 ```
 
-    [1] 1.768
+    [1] 1.709
 
 ``` r
 reproductive[, median(rt)]
@@ -428,7 +475,7 @@ reproductive[, median(rt)]
 reproductive[rt > 0, mean(rt)]
 ```
 
-    [1] 2.562319
+    [1] 2.491254
 
 ``` r
 hist(
@@ -522,7 +569,7 @@ text(
 
 ![](r0_5-epistorm_FALSE-rash_contact_redux_0.00-isolation_willingness_0.0-quarantine_willingness_0.9-contact_tracing_success_0.00_files/figure-commonmark/hist-outbreak-size-1.png)
 
-The probability of a large outbreak (more than 100 cases) is 55.5%.
+The probability of a large outbreak (more than 100 cases) is 53.7%.
 
 ## Hospitalizations
 
@@ -546,7 +593,8 @@ that combination of tool and virus id.
 ``` r
 hosp_tot <- hospitalizations[, .(total = sum(count)), by = .(sim_num, tool_id)]
 hosp_tot[, status := fifelse(tool_id == -1, "Unvax", "Vax")]
-hosp_tot[, tool_id := NULL]
+# There is one vaccine per efficacy level, so we add them up
+hosp_tot <- hosp_tot[, .(total = sum(total)), by = .(sim_num, status)]
 ```
 
 We can create a couple of boxplot to show how many cases we see per
@@ -622,9 +670,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 38.00s (2000 runs)
-    Last run speed      : 19.25 million agents x day / second
-    Average run speed   : 111.65 million agents x day / second
+    Total elapsed t     : 22.00s (2000 runs)
+    Last run speed      : 24.21 million agents x day / second
+    Average run speed   : 191.88 million agents x day / second
     Rewiring            : off
     Last seed used      : 321912252
 
@@ -636,6 +684,8 @@ summary(measles_model)
 
     Tool(s):
      - MMR
+     - MMR (efficacy 0.93)
+     - MMR (efficacy 1.00)
 
     Model parameters:
      - (IGNORED) Vax improved recovery : 0.5000
@@ -643,7 +693,7 @@ summary(measles_model)
      - Contact tracing success rate    : 0.0e+00
      - Days undetected                 : 2.0000
      - Hospitalization period          : 7.0000
-     - Hospitalization rate            : 0.0370
+     - Hospitalization rate            : 0.0278
      - Incubation period               : 12.0000
      - Isolation period                : 4.0000
      - Isolation willingness           : 0.0e+00
@@ -657,7 +707,7 @@ summary(measles_model)
      - Vax efficacy                    : 0.9700
 
     Distribution of the population at time 365:
-      - ( 0) Susceptible             : 5914 -> 3706
+      - ( 0) Susceptible             : 5914 -> 3811
       - ( 1) Latent                  :    1 -> 0
       - ( 2) Prodromal               :    0 -> 0
       - ( 3) Rash                    :    0 -> 0
@@ -668,20 +718,20 @@ summary(measles_model)
       - ( 8) Quarantined Prodromal   :    0 -> 0
       - ( 9) Quarantined Recovered   :    0 -> 0
       - (10) Hospitalized            :    0 -> 0
-      - (11) Recovered               :    0 -> 2208
+      - (11) Recovered               :    0 -> 2103
 
     Transition Probabilities:
      - Susceptible              1.00  0.00     -     -     -     -     -     -     -     -     -     -
      - Latent                      -  0.92  0.08     -     -     -     -     -     -     -     -     -
-     - Prodromal                   -     -  0.75  0.25     -     -     -     -     -     -     -     -
-     - Rash                        -     -     -  0.35  0.36  0.13     -     -     -     -  0.04  0.12
-     - Isolated                    -     -     -  0.31  0.40  0.15     -     -     -     -  0.04  0.10
-     - Isolated Recovered          -     -     -     -     -  0.54     -     -     -     -     -  0.46
+     - Prodromal                   -     -  0.76  0.24     -     -     -     -     -     -     -     -
+     - Rash                        -     -     -  0.36  0.36  0.13     -     -     -     -  0.02  0.12
+     - Isolated                    -     -     -  0.32  0.41  0.13     -     -     -     -  0.03  0.12
+     - Isolated Recovered          -     -     -     -     -  0.46     -     -     -     -     -  0.54
      - Quarantined Latent          -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Susceptible     -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Prodromal       -     -     -     -     -     -     -     -     -     -     -     -
      - Quarantined Recovered       -     -     -     -     -     -     -     -     -     -     -     -
-     - Hospitalized                -     -     -     -     -     -     -     -     -     -  0.85  0.15
+     - Hospitalized                -     -     -     -     -     -     -     -     -     -  0.83  0.17
      - Recovered                   -     -     -     -     -     -     -     -     -     -     -  1.00
 
 Like before, we can extract the results using the
@@ -733,7 +783,7 @@ legend(
 ![](r0_5-epistorm_FALSE-rash_contact_redux_0.00-isolation_willingness_0.0-quarantine_willingness_0.9-contact_tracing_success_0.00_files/figure-commonmark/compare-scenarios-1.png)
 
 The probability of observing an outbreak of more than 100 cases is
-55.50% with quarantine, and 55.70% without quarantine. So, although
+53.70% with quarantine, and 54.20% without quarantine. So, although
 mild, the quarantine process seems to have an effect in the outbreak
 size, with a higher number of cases observed in the scenario without
 quarantine.
@@ -759,7 +809,11 @@ peak_no_quarantine <- rbind(
 )
 
 library(ggplot2)
+```
 
+    Warning: package 'ggplot2' was built under R version 4.5.2
+
+``` r
 peak_no_quarantine |>
   ggplot(aes(
     x = date, y = incidence, group = sim_num
@@ -790,3 +844,40 @@ that does not consider, for example, individuals’ changing their
 behavior as a function of what is observed; it would be natural to
 expect some level of precaution, *e.g.*, reducing contact rates, would
 be observed in such a situation.
+
+## Session information
+
+``` r
+sessionInfo()
+```
+
+    R version 4.5.1 (2025-06-13)
+    Platform: aarch64-apple-darwin20
+    Running under: macOS Sequoia 15.0.1
+
+    Matrix products: default
+    BLAS:   /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRblas.0.dylib 
+    LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+
+    locale:
+    [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+    time zone: America/Denver
+    tzcode source: internal
+
+    attached base packages:
+    [1] stats     graphics  grDevices utils     datasets  methods   base     
+
+    other attached packages:
+    [1] ggplot2_4.0.3      data.table_1.18.4  measles_0.4.1-0    epiworldR_0.19.0-1
+
+    loaded via a namespace (and not attached):
+     [1] vctrs_0.7.3        cli_3.6.6          knitr_1.52         rlang_1.3.0       
+     [5] xfun_0.61          otel_0.2.0         generics_0.1.4     S7_0.2.2          
+     [9] jsonlite_2.0.0     labeling_0.4.3     glue_1.8.1         htmltools_0.5.9   
+    [13] scales_1.4.0       rmarkdown_2.31     grid_4.5.1         tibble_3.3.1      
+    [17] evaluate_1.0.5     fastmap_1.2.0      yaml_2.3.12        lifecycle_1.0.5   
+    [21] compiler_4.5.1     dplyr_1.2.1        RColorBrewer_1.1-3 pkgconfig_2.0.3   
+    [25] farver_2.1.2       digest_0.6.39      R6_2.6.1           tidyselect_1.2.1  
+    [29] pillar_1.11.1      parallel_4.5.1     magrittr_2.0.5     withr_3.0.3       
+    [33] tools_4.5.1        gtable_0.3.6      

@@ -11,9 +11,9 @@ RUN wget https://github.com/quarto-dev/quarto-cli/releases/download/v1.9.35/quar
 # Adding R packages
 RUN install2.r --error data.table quarto socialmixr multigroup.vaccine ggplot2 rvest
 
-# Installing the needed R package
-RUN installGithub.r \
-    UofUEpiBio/epiworldR@main \
-    UofUEpiBio/measles@gvegayon/rash-contact
+# Installing epiworldR and measles from r-universe. The analyses require
+# measles >= 0.4.1 (built on epiworldR >= 0.19.0).
+RUN Rscript -e 'install.packages(c("epiworldR", "measles"), repos = c("https://uofuepibio.r-universe.dev", "https://cloud.r-project.org"))' && \
+    Rscript -e 'stopifnot(packageVersion("epiworldR") >= "0.19.0", exists("clone_epi", envir = asNamespace("epiworldR")), packageVersion("measles") >= "0.4.1")'
 
 CMD ["bash"]

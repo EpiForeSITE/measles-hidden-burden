@@ -164,7 +164,10 @@ for (n in 1:nrow(es_ranges)) {
 
   tryCatch(
     stopifnot(
-      all(rowSums(epistorm2[i:j, , drop=FALSE]) == sum(epistorm[n, ]))
+      isTRUE(all.equal(
+        unname(rowSums(epistorm2[i:j, , drop=FALSE])),
+        rep(sum(epistorm[n, ]), j - i + 1)
+      ))
       ),
     error = \(e) {
       stop(
