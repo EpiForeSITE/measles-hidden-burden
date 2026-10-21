@@ -9,7 +9,14 @@ RUN wget https://github.com/quarto-dev/quarto-cli/releases/download/v1.9.35/quar
     rm quarto-1.9.35-linux-${TARGETARCH}.deb
 
 # Adding R packages
-RUN install2.r --error data.table quarto socialmixr multigroup.vaccine ggplot2 rvest
+RUN install2.r --error data.table quarto ggplot2 rvest remotes
+
+# Pinned versions for the data in data/utaz_data.R: socialmixr from CRAN and
+# multigroup.vaccine from GitHub (the 2024 census data and the Utah/Arizona
+# border vignette are not in a CRAN release yet).
+RUN Rscript -e 'remotes::install_version("socialmixr", version = "0.7.0", upgrade = "never")' && \
+    Rscript -e 'remotes::install_github("EpiForeSITE/multigroup-vaccine@ddd9201f28b9908c033542f6a2445b84619af1c7", upgrade = "never")' && \
+    Rscript -e 'stopifnot(packageVersion("socialmixr") == "0.7.0", file.exists(system.file("extdata", "hildale_ut_2024.csv", package = "multigroup.vaccine")))'
 
 # Installing epiworldR and measles from r-universe. The analyses require
 # measles >= 0.4.1 (built on epiworldR >= 0.19.0).
