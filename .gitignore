@@ -10,3 +10,6 @@ sensitivity_*/
 # in the repository.
 *.qmd
 *.R
+
+# Tests
+!tests/tinytest/*.R
