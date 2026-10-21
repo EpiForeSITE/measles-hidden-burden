@@ -50,6 +50,11 @@ schoolvax       <- c(16, 129, 80, 20, 55, 50, 27, 40, 93)
 for (a in unique(schoolagegroups)) {
   inds <- which(schoolagegroups == a)
   schoolpopsnew <- round(agepops[a] * schoolpops[inds] / sum(schoolpops[inds]))
+  # Rounding each school can leave the total a person off the census count;
+  # the largest school takes the difference
+  largest <- which.max(schoolpopsnew)
+  schoolpopsnew[largest] <- schoolpopsnew[largest] + agepops[a] -
+    sum(schoolpopsnew)
   schoolvax[inds] <- round(schoolpopsnew * schoolvax[inds] / schoolpops[inds])
   schoolpops[inds] <- schoolpopsnew
 }

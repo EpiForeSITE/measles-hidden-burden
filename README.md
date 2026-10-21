@@ -18,7 +18,7 @@ The population, contact matrices, and vaccination data for the Utah-Arizona bord
 make data   # runs data/utaz_data.R and data/epistorm_matrix.R
 ```
 
-[`data/utaz_data.R`](./data/utaz_data.R) follows the [`multigroup.vaccine` vignette](https://github.com/EpiForeSITE/multigroup-vaccine/blob/ddd9201f28b9908c033542f6a2445b84619af1c7/vignettes/experiments/utaz_age_school.Rmd) and writes `data/utaz_population.rds`, `data/utaz_contacts_polymod.rds`, and one `data/utaz_vaccination_adults_<assumption>.rds` file per adult vaccination assumption: `baseline`, `78pct`, `86pct`, and `93pct` (the "Alternate adult immunization assumptions" of the vignette). To add an assumption, call `save_vaccination(<coverage>)` at the end of the script (for example, `save_vaccination(0.9)` writes `utaz_vaccination_adults_90pct.rds`). The `baseline` data is identical to `measles::short_creek` (measles 0.4.1). The POLYMOD matrix differs from `measles::short_creek_matrix` by up to 1.6% per cell (0.6% on average), since the latter was built with an earlier development version of `multigroup.vaccine`; after calibration, the deterministic final size changes by less than 0.1%.
+[`data/utaz_data.R`](./data/utaz_data.R) follows the [`multigroup.vaccine` vignette](https://github.com/EpiForeSITE/multigroup-vaccine/blob/ddd9201f28b9908c033542f6a2445b84619af1c7/vignettes/experiments/utaz_age_school.Rmd) and writes `data/utaz_population.rds`, `data/utaz_contacts_polymod.rds`, and one `data/utaz_vaccination_adults_<assumption>.rds` file per adult vaccination assumption: `baseline`, `78pct`, `86pct`, and `93pct` (the "Alternate adult immunization assumptions" of the vignette). To add an assumption, call `save_vaccination(<coverage>)` at the end of the script (for example, `save_vaccination(0.9)` writes `utaz_vaccination_adults_90pct.rds`). The `baseline` data matches `measles::short_creek` (measles 0.4.1) except for the school sizes: rounding the rescaled schools can leave an age group a person off its census count, and here the largest school takes the difference (one person fewer in the largest school of ages 5-11 and of ages 12-13). The deterministic final sizes at R0 = 9 change by at most one infection. The POLYMOD matrix differs from `measles::short_creek_matrix` by up to 1.6% per cell (0.6% on average), since the latter was built with an earlier development version of `multigroup.vaccine`; after calibration, the deterministic final size changes by less than 0.1%.
 
 ### Tests
 
@@ -28,11 +28,8 @@ make data   # runs data/utaz_data.R and data/epistorm_matrix.R
 make test
 ```
 
-- **Population:** the census total, school counts that add up to their age group (up to rounding), and the same groups in every file.
-- **Vaccination:** coverages between 0 and 1, the baseline and alternate adult assumptions, and a plausible overall coverage.
-- **Contact matrices:** dimensions and names, reciprocity, plausible contacts per day, and more contacts within a school than between schools.
-- **Calibration:** for each R0 in the Makefile, a positive scaling factor that grows with R0 and gives back the target R0 (as the spectral radius of the next-generation matrix), plausible contacts per day after scaling, and an effective reproduction number between 1 and R0.
-- **Final size:** the deterministic final sizes at R0 = 9 match the vignette (2788, 2396, 2158, and 1969).
+- **Data:** the census total, school counts that add up to their age group, rates between 0 and 1 with a plausible overall coverage, alternate adult assumptions that change only ages 18-69, and reciprocal contact matrices.
+- **Calibration:** for each R0 in the Makefile, the scaled matrix gives back R0 with plausible contacts per day, and the deterministic final sizes at R0 = 9 are within 0.5% of the vignette.
 - **Rebuild:** a fresh build with the data scripts matches the committed files.
 
 [`.github/workflows/tests.yml`](./.github/workflows/tests.yml) runs them in the dev container on pull requests and pushes to `main` that change the data, the tests, or the container.
