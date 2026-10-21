@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Data sources used by the genomic (phylodynamic) analysis vs. the agent-based model.
+  Editable: every block is a named <g>; text lines are plain <text> elements.
+  Palette: genomic = blue (#2b6cb0), ABM = orange (#c05621), shared = gray (#4a5568).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="310" viewBox="0 0 960 310"
+     font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+            orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4a5568"/>
+    </marker>
+    <style>
+      .lbl   { font-size: 12px; font-weight: bold; letter-spacing: 1.5px; }
+      .src1  { font-size: 13px; font-weight: bold; fill: #1a202c; }
+      .src2  { font-size: 11.5px; fill: #4a5568; }
+      .mod   { font-size: 16px; font-weight: bold; fill: #ffffff; }
+      .gen   { fill: #ebf4ff; stroke: #2b6cb0; stroke-width: 1.5; }
+      .abm   { fill: #fff5eb; stroke: #c05621; stroke-width: 1.5; }
+      .shr   { fill: #edf2f7; stroke: #4a5568; stroke-width: 1.5; stroke-dasharray: 5 3; }
+      .bus   { stroke: #4a5568; stroke-width: 1.6; fill: none; }
+      .link  { stroke: #4a5568; stroke-width: 1.6; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="960" height="310" fill="#ffffff"/>
+
+  <!-- ================= GENOMIC-ONLY SOURCES (left) ================= -->
+  <g id="genomic-sources">
+    <text class="lbl" x="135" y="40" text-anchor="middle" style="fill:#2b6cb0">GENOMIC ANALYSIS ONLY</text>
+
+    <g id="src-sequences">
+      <rect class="gen" x="20" y="90" width="230" height="46" rx="6"/>
+      <text class="src1" x="135" y="110" text-anchor="middle">Measles whole-genome sequences</text>
+      <text class="src2" x="135" y="126" text-anchor="middle">53% of confirmed cases</text>
+    </g>
+    <g id="src-dates">
+      <rect class="gen" x="20" y="150" width="230" height="46" rx="6"/>
+      <text class="src1" x="135" y="170" text-anchor="middle">Sample collection dates</text>
+      <text class="src2" x="135" y="186" text-anchor="middle">symptom onset or specimen date</text>
+    </g>
+    <g id="src-linkage">
+      <rect class="gen" x="20" y="210" width="230" height="46" rx="6"/>
+      <text class="src1" x="135" y="230" text-anchor="middle">Case linkage</text>
+      <text class="src2" x="135" y="246" text-anchor="middle">epidemiological or genomic</text>
+    </g>
+  </g>
+
+  <!-- ================= ABM-ONLY SOURCES (right) ================= -->
+  <g id="abm-sources">
+    <text class="lbl" x="825" y="40" text-anchor="middle" style="fill:#c05621">ABM ONLY</text>
+
+    <g id="src-population">
+      <rect class="abm" x="710" y="60" width="230" height="46" rx="6"/>
+      <text class="src1" x="825" y="80" text-anchor="middle">Population &amp; age structure</text>
+      <text class="src2" x="825" y="96" text-anchor="middle">2024 U.S. Census</text>
+    </g>
+    <g id="src-school-mmr">
+      <rect class="abm" x="710" y="120" width="230" height="46" rx="6"/>
+      <text class="src1" x="825" y="140" text-anchor="middle">School-level MMR coverage</text>
+      <text class="src2" x="825" y="156" text-anchor="middle">UT DHHS, AZ DHS</text>
+    </g>
+    <g id="src-adult-vax">
+      <rect class="abm" x="710" y="180" width="230" height="46" rx="6"/>
+      <text class="src1" x="825" y="200" text-anchor="middle">Adult vaccination coverage</text>
+      <text class="src2" x="825" y="216" text-anchor="middle">national estimates</text>
+    </g>
+    <g id="src-contacts">
+      <rect class="abm" x="710" y="240" width="230" height="46" rx="6"/>
+      <text class="src1" x="825" y="260" text-anchor="middle">Age-mixing contact matrix</text>
+      <text class="src2" x="825" y="276" text-anchor="middle">POLYMOD</text>
+    </g>
+  </g>
+
+  <!-- ================= SHARED SOURCE (center) ================= -->
+  <g id="shared-sources">
+    <text class="lbl" x="480" y="40" text-anchor="middle" style="fill:#4a5568">SHARED</text>
+    <g id="src-cases">
+      <rect class="shr" x="375" y="60" width="210" height="46" rx="6"/>
+      <text class="src1" x="480" y="80" text-anchor="middle">Reported case data</text>
+      <text class="src2" x="480" y="96" text-anchor="middle">Utah surveillance, used to derive R<tspan baseline-shift="sub" font-size="75%">0</tspan></text>
+    </g>
+  </g>
+
+  <!-- ================= MODELS ================= -->
+  <g id="genomic-model">
+    <rect x="290" y="133" width="170" height="80" rx="8" fill="#2b6cb0"/>
+    <text class="mod" x="375" y="168" text-anchor="middle">Genomic</text>
+    <text class="mod" x="375" y="188" text-anchor="middle">(phylodynamic)</text>
+  </g>
+
+  <g id="abm-model">
+    <rect x="500" y="133" width="170" height="80" rx="8" fill="#c05621"/>
+    <text class="mod" x="585" y="168" text-anchor="middle">Agent-based</text>
+    <text class="mod" x="585" y="188" text-anchor="middle">model</text>
+  </g>
+
+  <!-- ================= ARROWS ================= -->
+  <g id="arrows">
+    <!-- genomic sources -> genomic model -->
+    <path class="bus" d="M250,113 H270 M250,173 H270 M250,233 H270 M270,113 V233"/>
+    <path class="link" d="M270,173 H288"/>
+    <!-- ABM sources -> ABM model -->
+    <path class="bus" d="M710,83 H690 M710,143 H690 M710,203 H690 M710,263 H690 M690,83 V263"/>
+    <path class="link" d="M690,173 H672"/>
+    <!-- shared -> both models -->
+    <path class="link" d="M420,106 V131"/>
+    <path class="link" d="M540,106 V131"/>
+  </g>
+</svg>
