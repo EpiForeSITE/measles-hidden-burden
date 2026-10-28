@@ -186,7 +186,7 @@ for (n in 1:nrow(es_ranges)) {
 }
 
 # ==============================================================================
-# Collapse the 1-year matrix into the Short Creek (Utah-Arizona border) age bands
+# Collapse the 1-year matrix into the Utah-Arizona border age bands
 # Age indices are 1-based (age 0 → index 1, age 80 → index 81)
 
 ages <- data.frame(
@@ -195,7 +195,7 @@ ages <- data.frame(
 )
 
 # Collapse by summing rows within each band and then averaging across rows
-short_creek_epistorm <- matrix(0, nrow = nrow(ages), ncol = nrow(ages))
+utaz_epistorm <- matrix(0, nrow = nrow(ages), ncol = nrow(ages))
 
 for (n in seq_len(nrow(ages))) {
   
@@ -209,7 +209,7 @@ for (n in seq_len(nrow(ages))) {
 
     # We first collapse the columns and then take the mean 
     # to distribute the contacts proportionally
-    short_creek_epistorm[n, m] <-
+    utaz_epistorm[n, m] <-
       rowSums(epistorm2[row_i:row_j, col_i:col_j, drop=FALSE]) |>
       mean()
 
@@ -222,57 +222,29 @@ dn <- c(
   "under1", "1to4", "5to11", "12to13", "14to17", "18to24",
   "25to44", "45to69", "70+"
   )
-dimnames(short_creek_epistorm) <- list(dn, dn)
+dimnames(utaz_epistorm) <- list(dn, dn)
 
 # ==============================================================================
-# Preparing to scale the matrix for the short creek population
+# Preparing to scale the matrix for the Utah-Arizona border population
+# (created by utaz_data.R)
 # ==============================================================================
 
-hildale_path <- system.file("extdata", "hildale_ut_2024.csv", package = "multigroup.vaccine")
-colorado_city_path <- system.file("extdata", "colorado_city_az_2024.csv", package = "multigroup.vaccine")
-centennial_park_path <- system.file("extdata", "centennial_park_az_2024.csv", package = "multigroup.vaccine")
-
-agelims <- c(0, 1, 5, 12, 14, 18, 25, 45, 70)
-
-hildale <- getCityData(
-  city_name = "Hildale city, Utah",
-  csv_path = hildale_path,
-  age_groups = agelims
-)
-
-colorado_city <- getCityData(
-  city_name = "Colorado City town, Arizona",
-  csv_path = colorado_city_path,
-  age_groups = agelims
-)
-
-centennial_park <- getCityData(
-  city_name = "Centennial Park CDP, Arizona",
-  csv_path = centennial_park_path,
-  age_groups = agelims
-)
-
-agepops <- round(hildale$age_pops + colorado_city$age_pops + centennial_park$age_pops)
-schoolpops <- c(250, 350, 190, 86, 150, 84, 114, 108, 205)
-schoolagegroups <- c(3, 3, 3, 4, 4, 4, 5, 5, 5)
-
-# Readjust the school populations to match the age data:
-for (a in unique(schoolagegroups)) {
-  inds <- which(schoolagegroups == a)
-  schoolpops[inds] <- round(agepops[a] * schoolpops[inds] / sum(schoolpops[inds]))
-}
+pop <- readRDS(file.path("data", "utaz_population.rds"))
+agepops         <- pop$agepops
+schoolpops      <- pop$schoolpops
+schoolagegroups <- pop$schoolagegroups
 
 # Ensuring symmetry before we apply the school-age adjustments
-short_creek_epistorm <- make_cmat_symmetric(short_creek_epistorm, agepops)
+utaz_epistorm <- make_cmat_symmetric(utaz_epistorm, agepops)
 
 # Verify symmetry of the age-only matrix before school splitting
 stopifnot(all(abs(
-  short_creek_epistorm * agepops -
-  t(short_creek_epistorm * agepops)
+  utaz_epistorm * agepops -
+  t(utaz_epistorm * agepops)
 ) < 1e-10))
 
 cm <- contactMatrixAgeSchool2(
-  cmp = short_creek_epistorm,
+  cmp = utaz_epistorm,
   agepops = agepops,
   schoolagegroups = schoolagegroups,
   schoolpops = schoolpops,
@@ -293,38 +265,29 @@ stopifnot(max(abs(
 
 # Inspect the diagonal proportion of within-group contacts (for review)
 message("Diagonal share of contacts — age groups:")
-print(round(diag(short_creek_epistorm / rowSums(short_creek_epistorm)), 3))
+print(round(diag(utaz_epistorm / rowSums(utaz_epistorm)), 3))
 message("Diagonal share of contacts — school-resolved groups:")
 print(round(diag(cm / rowSums(cm)), 3))
 
 saveRDS(
   cm,
-  file = file.path("data", "short_creek_epistorm.rds")
+  file = file.path("data", "utaz_contacts_epistorm.rds")
   )
 
 # ==============================================================================
-# Final validation against measles::short_creek_matrix
+# Final validation against the POLYMOD matrix (created by utaz_data.R)
 # ==============================================================================
 
-ref_matrix <- measles::short_creek_matrix
-ref_pops   <- measles::short_creek$agepops
+ref_matrix <- readRDS(file.path("data", "utaz_contacts_polymod.rds"))
 
-# 1. Dimensions must match
+# Same groups and the same population
 stopifnot(
-  "dim(cm) does not match dim(measles::short_creek_matrix)" =
-    identical(dim(cm), dim(ref_matrix))
+  "dimnames(cm) do not match the POLYMOD matrix" =
+    identical(unname(dimnames(cm)), unname(dimnames(ref_matrix))),
+  "group sizes do not match the vaccination data" =
+    all(grouppops == readRDS(
+      file.path("data", "utaz_vaccination_adults_baseline.rds")
+    )$agepops)
 )
 
-# 2. Both matrices should be approximately symmetric when scaled by group pops
-max_asym_cm  <- max(abs(cm * grouppops - t(cm * grouppops)))
-max_asym_ref <- max(abs(ref_matrix * ref_pops - t(ref_matrix * ref_pops)))
-
-stopifnot(
-  "cm is not approximately symmetric after scaling by grouppops" =
-    max_asym_cm < 1e-10,
-  "measles::short_creek_matrix is not approximately symmetric after scaling by agepops" =
-    max_asym_ref < 1e-10
-)
-
-message("Validation passed: dimensions match and both matrices are symmetric.")
-
+message("Validation passed: same groups and population as the POLYMOD matrix.")

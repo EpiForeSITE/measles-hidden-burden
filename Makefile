@@ -1,6 +1,6 @@
 MAKEFLAGS += --no-print-directory
 
-REPORT_NAME=r0_$(R0)-epistorm_$(EPISTORM)-rash_contact_redux_$(RASH_CONTACT_REDUX)-isolation_willingness_$(ISO_WILL)-quarantine_willingness_$(Q_WILL)-contact_tracing_success_$(QT_SUCCESS)
+REPORT_NAME=r0_$(R0)-epistorm_$(EPISTORM)-rash_contact_redux_$(RASH_CONTACT_REDUX)-isolation_willingness_$(ISO_WILL)-quarantine_willingness_$(Q_WILL)-contact_tracing_success_$(QT_SUCCESS)-vax_adults_$(VAX_ADULTS)
 
 R0 ?= 12
 EPISTORM ?= FALSE
@@ -8,6 +8,7 @@ RASH_CONTACT_REDUX ?= 0.2
 ISO_WILL ?= 0.0
 Q_WILL ?= 0.9
 QT_SUCCESS ?= 0.8
+VAX_ADULTS ?= baseline
 TARGET_DIR ?= scenarios
 
 R0_VALUES = 5 7 9 11 13 15 17
@@ -19,6 +20,11 @@ scenarios:
 		R0=$$r0 RASH_CONTACT_REDUX=0.50 QT_SUCCESS=0.00  make report && \
 		R0=$$r0 RASH_CONTACT_REDUX=0.75 QT_SUCCESS=0.25  make report; \
 	done
+
+# Population, contact matrices, and vaccination data (see data/utaz_data.R)
+data:
+	Rscript data/utaz_data.R
+	Rscript data/epistorm_matrix.R
 
 # Report generation
 report:
@@ -38,7 +44,8 @@ report:
 			-P rash_contact_redux=$(RASH_CONTACT_REDUX) \
 			-P isolation_willingness=$(ISO_WILL) \
 			-P quarantine_willingness=$(Q_WILL) \
-			-P contact_tracing_success=$(QT_SUCCESS) && \
+			-P contact_tracing_success=$(QT_SUCCESS) \
+			-P vax_adults=$(VAX_ADULTS) && \
 		rm -f $(TARGET_DIR)/$(REPORT_NAME).qmd; \
 	fi
 
@@ -67,4 +74,4 @@ sensitivity_rash_redux:
 		done; \
 	done
 
-.PHONY: scenarios report clean sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux sensitivity_analysis
+.PHONY: data scenarios report clean sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux sensitivity_analysis
