@@ -31,6 +31,7 @@ make test
 - **Data:** the census total, school counts that add up to their age group, rates between 0 and 1 with a plausible overall coverage, alternate adult assumptions that change only ages 18-69, and reciprocal contact matrices.
 - **Calibration:** for each R0 in the Makefile, the scaled matrix gives back R0 with plausible contacts per day, and the deterministic final sizes at R0 = 9 are within 0.5% of the vignette.
 - **Rebuild:** a fresh build with the data scripts matches the committed files.
+- **Phylodynamic figures:** Figure 4A-B built from the EBSP logs gives the linked outbreak sizes of the preprint at R0 = 9.
 - **ABM figures:** Figure 4C-D built from the R0 = 9 outputs in `scenarios/` keeps one final size per retained run, covers the 53 weeks of the simulation, and draws the scenario with quarantine from the run with quarantine.
 
 [`.github/workflows/tests.yml`](./.github/workflows/tests.yml) runs them in the dev container on pull requests and pushes to `main` that change the data, the tests, or the container.
@@ -61,13 +62,14 @@ The `EPISTORM=FALSE` will use POLYMOD's contact data (default), setting it to `T
 
 ### Figures
 
-The agent-based model panels of Figure 4 (C, weekly cases; D, final outbreak size) are built from the R0 = 9 scenario outputs in `scenarios/` with [`Figure_Data/FigureABM.R`](./Figure_Data/FigureABM.R):
+Figure 4 is built with `make figures`:
 
-```bash
-make figures   # Figure_Data/Figure4CD.{png,pdf} and Figure4CD_paper_arms.{png,pdf}
-```
+- [`Figure_Data/FigurePhylodynamic.R`](./Figure_Data/FigurePhylodynamic.R): phylodynamic panels (A, effective population size; B, linked outbreak size) from the EBSP logs (`Figure_Data/EBSP_*.log`), in `Figure_Data/Figure4AB.{png,pdf}`, and the full figure in `Figure_Data/Figure4.{png,pdf}`.
+- [`Figure_Data/FigureABM.R`](./Figure_Data/FigureABM.R): agent-based model panels (C, weekly cases; D, final outbreak size) from the R0 = 9 scenario outputs in `scenarios/`, in `Figure_Data/Figure4CD.{png,pdf}` and `Figure4CD_paper_arms.{png,pdf}`.
 
-Runs with fewer than 10 cases are excluded as early extinctions. Weekly cases are summed over Monday-to-Sunday weeks starting August 6, 2025 (day 0, one infectious case), and summarized by the median and interquartile range across the retained runs. The final outbreak size is the cumulative number of infections at day 365.
+For A, Nₑ is scaled by σ / generation time, with σ = 1/R0 + 1/0.34 + 1 at R0 = 9 and a generation time of 11.9 days, after a 10% burn-in; the band is the 2.5%-97.5% interval across posterior samples. For B, the scaled Nₑ is summed once per generation time, taking the largest value within ±0.015 years ([`BedfordMethodCount.R`](./BedfordMethodCount.R)); the bounds are the same sums of the interval limits.
+
+For C and D, runs with fewer than 10 cases are excluded as early extinctions. Weekly cases are summed over Monday-to-Sunday weeks starting August 6, 2025 (day 0, one infectious case), and summarized by the median and interquartile range across the retained runs. The final outbreak size is the cumulative number of infections at day 365.
 
 Each scenario output holds a run with quarantine and one without. "Self-isolation with quarantine" (75% rash contact reduction, 25% contact-tracing success) uses the run with quarantine; the other two scenarios have no contact tracing and use the run without. The preprint's Figure 4C-D drew all three scenarios from the run without quarantine; `Figure4CD_paper_arms` reproduces that choice.
 

@@ -55,6 +55,9 @@ INK_PRIMARY   <- "#0b0b0b"
 INK_SECONDARY <- "#52514e"
 GRID_COLOR    <- "#e4e3df"
 
+# Date range shared by the time panels of Figure 4 (A and C)
+FIGURE4_XLIM <- as.Date(c("2025-07-01", "2026-03-01"))
+
 #' Path of the simulation output of one scenario
 #'
 #' Matches files with and without the `-vax_adults_<assumption>` suffix (runs
@@ -162,7 +165,7 @@ abm_summaries <- function(
   )
 }
 
-theme_abm <- function(base_size = 11) {
+theme_figure4 <- function(base_size = 11) {
   theme_minimal(base_size = base_size) +
     theme(
       text               = element_text(color = INK_PRIMARY),
@@ -185,7 +188,7 @@ theme_abm <- function(base_size = 11) {
 }
 
 #' Figure 4C: weekly cases over time (median and IQR across runs)
-plot_abm_weekly <- function(summaries, xlim = as.Date(c("2025-08-01", "2026-03-01"))) {
+plot_abm_weekly <- function(summaries, xlim = FIGURE4_XLIM) {
   weekly <- summaries$weekly[week <= xlim[2]]
 
   peaks <- weekly[, .SD[which.max(median)], by = scenario]
@@ -243,7 +246,7 @@ plot_abm_weekly <- function(summaries, xlim = as.Date(c("2025-08-01", "2026-03-0
       tag      = "C"
     ) +
     guides(color = guide_legend(nrow = 1), fill = "none") +
-    theme_abm()
+    theme_figure4()
 }
 
 #' Figure 4D: final outbreak size (cases by day 365) per run
@@ -314,7 +317,7 @@ plot_abm_final <- function(summaries, large = 100) {
       subtitle = subtitle,
       tag      = "D"
     ) +
-    theme_abm() +
+    theme_figure4() +
     theme(axis.text.x = element_text(color = INK_PRIMARY, lineheight = 0.95))
 }
 

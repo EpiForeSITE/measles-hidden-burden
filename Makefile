@@ -30,12 +30,14 @@ data:
 test:
 	Rscript -e 'r <- tinytest::run_test_dir("tests/tinytest", verbose = 1); print(summary(r)); if (!all(as.logical(r))) quit(status = 1)'
 
-# ABM panels of Figure 4 (R0 = 9) from the outputs in scenarios/. The
-# paper_arms version draws the scenario with quarantine from the run without
-# quarantine, as in the preprint (see Figure_Data/FigureABM.R)
+# Figure 4: phylodynamic panels (A-B) from the EBSP logs, ABM panels (C-D,
+# R0 = 9) from the outputs in scenarios/, and both together. The paper_arms
+# version draws the scenario with quarantine from the run without quarantine,
+# as in the preprint (see Figure_Data/FigureABM.R)
 figures:
 	Rscript Figure_Data/FigureABM.R
 	Rscript Figure_Data/FigureABM.R --paper-arms
+	Rscript Figure_Data/FigurePhylodynamic.R
 
 # Report generation
 report:
