@@ -9,6 +9,8 @@ on:
     paths:
       - "data/**"
       - "tests/**"
+      - "Figure_Data/FigureABM.R"
+      - "scenarios/r0_9.00-*.rds"
       - "Makefile"
       - ".devcontainer/Containerfile"
       - ".github/workflows/tests.yml"
@@ -16,6 +18,8 @@ on:
     paths:
       - "data/**"
       - "tests/**"
+      - "Figure_Data/FigureABM.R"
+      - "scenarios/r0_9.00-*.rds"
       - "Makefile"
       - ".devcontainer/Containerfile"
       - ".github/workflows/tests.yml"

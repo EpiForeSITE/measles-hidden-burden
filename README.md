@@ -31,6 +31,7 @@ make test
 - **Data:** the census total, school counts that add up to their age group, rates between 0 and 1 with a plausible overall coverage, alternate adult assumptions that change only ages 18-69, and reciprocal contact matrices.
 - **Calibration:** for each R0 in the Makefile, the scaled matrix gives back R0 with plausible contacts per day, and the deterministic final sizes at R0 = 9 are within 0.5% of the vignette.
 - **Rebuild:** a fresh build with the data scripts matches the committed files.
+- **ABM figures:** Figure 4C-D built from the R0 = 9 outputs in `scenarios/` keeps one final size per retained run, covers the 53 weeks of the simulation, and draws the scenario with quarantine from the run with quarantine.
 
 [`.github/workflows/tests.yml`](./.github/workflows/tests.yml) runs them in the dev container on pull requests and pushes to `main` that change the data, the tests, or the container.
 
@@ -57,6 +58,18 @@ The `EPISTORM=FALSE` will use POLYMOD's contact data (default), setting it to `T
 - `Q_WILL`: Quarantine willingness.
 - `QT_SUCCESS`: Success rate of contact tracing.
 - `VAX_ADULTS`: Adult vaccination assumption, `baseline` (default) or the coverage of adults aged 18–69 (e.g., `78pct`); see [Data](#data).
+
+### Figures
+
+The agent-based model panels of Figure 4 (C, weekly cases; D, final outbreak size) are built from the R0 = 9 scenario outputs in `scenarios/` with [`Figure_Data/FigureABM.R`](./Figure_Data/FigureABM.R):
+
+```bash
+make figures   # Figure_Data/Figure4CD.{png,pdf} and Figure4CD_paper_arms.{png,pdf}
+```
+
+Runs with fewer than 10 cases are excluded as early extinctions. Weekly cases are summed over Monday-to-Sunday weeks starting August 6, 2025 (day 0, one infectious case), and summarized by the median and interquartile range across the retained runs. The final outbreak size is the cumulative number of infections at day 365.
+
+Each scenario output holds a run with quarantine and one without. "Self-isolation with quarantine" (75% rash contact reduction, 25% contact-tracing success) uses the run with quarantine; the other two scenarios have no contact tracing and use the run without. The preprint's Figure 4C-D drew all three scenarios from the run without quarantine; `Figure4CD_paper_arms` reproduces that choice.
 
 ## Parameters & references
 
