@@ -9,7 +9,7 @@ RUN wget https://github.com/quarto-dev/quarto-cli/releases/download/v1.9.35/quar
     rm quarto-1.9.35-linux-${TARGETARCH}.deb
 
 # Adding R packages
-RUN install2.r --error data.table quarto ggplot2 rvest remotes
+RUN install2.r --error data.table quarto ggplot2 rvest remotes tinytest
 
 # Pinned versions for the data in data/utaz_data.R: socialmixr from CRAN and
 # multigroup.vaccine from GitHub (the 2024 census data and the Utah/Arizona

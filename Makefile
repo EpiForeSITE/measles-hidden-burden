@@ -26,6 +26,10 @@ data:
 	Rscript data/utaz_data.R
 	Rscript data/epistorm_matrix.R
 
+# Checks of the data (see tests/tinytest)
+test:
+	Rscript -e 'r <- tinytest::run_test_dir("tests/tinytest", verbose = 1); print(summary(r)); if (!all(as.logical(r))) quit(status = 1)'
+
 # Report generation
 report:
 	@if [ -f "$(TARGET_DIR)/$(REPORT_NAME).md" ]; then \
@@ -74,4 +78,4 @@ sensitivity_rash_redux:
 		done; \
 	done
 
-.PHONY: data scenarios report clean sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux sensitivity_analysis
+.PHONY: data test scenarios report clean sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux sensitivity_analysis

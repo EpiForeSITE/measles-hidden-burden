@@ -1,0 +1,47 @@
+# Checks the data (tests/tinytest, `make test`) in the dev container. The image
+# is built here for amd64 only, reusing the build cache of container.yml, so
+# pull requests are tested with the Containerfile they change.
+name: Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/**"
+      - "tests/**"
+      - "Makefile"
+      - ".devcontainer/Containerfile"
+      - ".github/workflows/tests.yml"
+  pull_request:
+    paths:
+      - "data/**"
+      - "tests/**"
+      - "Makefile"
+      - ".devcontainer/Containerfile"
+      - ".github/workflows/tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .devcontainer
+          file: .devcontainer/Containerfile
+          platforms: linux/amd64
+          load: true
+          tags: measles-hidden-burden:test
+          cache-from: type=gha
+
+      - name: Run tests
+        run: |
+          docker run --rm -v "$PWD":/work -w /work \
+            measles-hidden-burden:test make test
