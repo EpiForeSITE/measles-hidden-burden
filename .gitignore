@@ -11,5 +11,6 @@ sensitivity_*/
 *.qmd
 *.R
 
-# Tests
+# Tests and figure scripts
 !tests/tinytest/*.R
+!Figure_Data/*.R

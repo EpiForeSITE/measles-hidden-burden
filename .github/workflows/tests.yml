@@ -9,6 +9,11 @@ on:
     paths:
       - "data/**"
       - "tests/**"
+      - "Figure_Data/FigureABM.R"
+      - "Figure_Data/FigurePhylodynamic.R"
+      - "Figure_Data/EBSP_*.log"
+      - "plotEBSP.R"
+      - "scenarios/r0_9.00-*.rds"
       - "Makefile"
       - ".devcontainer/Containerfile"
       - ".github/workflows/tests.yml"
@@ -16,6 +21,11 @@ on:
     paths:
       - "data/**"
       - "tests/**"
+      - "Figure_Data/FigureABM.R"
+      - "Figure_Data/FigurePhylodynamic.R"
+      - "Figure_Data/EBSP_*.log"
+      - "plotEBSP.R"
+      - "scenarios/r0_9.00-*.rds"
       - "Makefile"
       - ".devcontainer/Containerfile"
       - ".github/workflows/tests.yml"

@@ -30,6 +30,15 @@ data:
 test:
 	Rscript -e 'r <- tinytest::run_test_dir("tests/tinytest", verbose = 1); print(summary(r)); if (!all(as.logical(r))) quit(status = 1)'
 
+# Figure 4: phylodynamic panels (A-B) from the EBSP logs, ABM panels (C-D,
+# R0 = 9) from the outputs in scenarios/, and both together. The paper_arms
+# version draws the scenario with quarantine from the run without quarantine,
+# as in the preprint (see Figure_Data/FigureABM.R)
+figures:
+	Rscript Figure_Data/FigureABM.R
+	Rscript Figure_Data/FigureABM.R --paper-arms
+	Rscript Figure_Data/FigurePhylodynamic.R
+
 # Report generation
 report:
 	@if [ -f "$(TARGET_DIR)/$(REPORT_NAME).md" ]; then \
@@ -78,4 +87,4 @@ sensitivity_rash_redux:
 		done; \
 	done
 
-.PHONY: data test scenarios report clean sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux sensitivity_analysis
+.PHONY: data test figures scenarios report clean sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux sensitivity_analysis
