@@ -68,7 +68,10 @@ For the data, we need two datasets: information about the population distributio
 stopifnot(
   packageVersion("measles") >= "0.4.1",
   packageVersion("epiworldR") >= "0.19.0",
-  exists("clone_epi", envir = asNamespace("epiworldR"))
+  exists("clone_epi", envir = asNamespace("epiworldR")),
+  # Builds from UofUEpiBio/measles#69 on draw lognormal stage durations
+  "measles build newer than the pinned one (see the README)" =
+    !"incubation_period_sd" %in% names(formals(ModelMeaslesMixing))
 )
 vax_file <- sprintf(
   "data/utaz_vaccination_adults_%s.rds",

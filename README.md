@@ -1,6 +1,6 @@
 # Utah-Arizona Border Simulations
 
-This repository contains the R code needed to reproduce the analyses in paper *"Hidden Burden of a Measles Outbreak Revealed by Genomic and Transmission Models"*. Dependencies include the [`measles`](https://github.com/UofUEpiBio/measles) R package (version 0.4.1 or later, built on [`epiworldR`](https://github.com/UofUEpiBio/epiworldR) 0.19.0 or later, with `clone_epi()`, both installed from [r-universe](https://uofuepibio.r-universe.dev) in the dev container, see [`.devcontainer/Containerfile`](./.devcontainer/Containerfile)), [`multigroup.vaccine`](https://github.com/EpiForeSITE/multigroup-vaccine) (pinned to commit `ddd9201`) and [`socialmixr`](https://cran.r-project.org/package=socialmixr) (pinned to 0.7.0) for the population, contact, and vaccination data, [Quarto](https://quarto.org) for rendering reports, `ggplot2` for visualization, and `data.table` for data wrangling.
+This repository contains the R code needed to reproduce the analyses in paper *"Hidden Burden of a Measles Outbreak Revealed by Genomic and Transmission Models"*. Dependencies include the [`measles`](https://github.com/UofUEpiBio/measles) R package (0.4.1 at commit [`d1e87fe`](https://github.com/UofUEpiBio/measles/commit/d1e87fed204ebe820620759fa1b85cdb9d2e0b03), built on [`epiworldR`](https://github.com/UofUEpiBio/epiworldR) 0.19.0 at commit [`ce1cb0f`](https://github.com/UofUEpiBio/epiworldR/commit/ce1cb0f088b9a3a19674fb6598b2c42780c72b12); both pinned in the dev container, see [`.devcontainer/Containerfile`](./.devcontainer/Containerfile)), [`multigroup.vaccine`](https://github.com/EpiForeSITE/multigroup-vaccine) (pinned to commit `ddd9201`) and [`socialmixr`](https://cran.r-project.org/package=socialmixr) (pinned to 0.7.0) for the population, contact, and vaccination data, [Quarto](https://quarto.org) for rendering reports, `ggplot2` for visualization, and `data.table` for data wrangling.
 
 ## Container
 
@@ -78,7 +78,7 @@ Each scenario output holds a run with quarantine and one without. "Self-isolatio
 
 This section lists every parameter used in the analyses. It follows the canonical, cited table in the `measles` R package: [`measles_parameters.csv`](https://github.com/UofUEpiBio/measles/blob/main/inst/extdata/measles_parameters.csv) (see also the [parameters vignette](https://github.com/UofUEpiBio/measles/blob/main/vignettes/parameters.qmd)). See [EpiForeSITE/measles#5](https://github.com/EpiForeSITE/measles/issues/5) for background.
 
-The analyses are set up to be run with `measles` 0.4.1 or later; `template.qmd` stops if an older version is installed, and each report ends with the session information.
+The analyses use `measles` 0.4.1 at commit `d1e87fe` and `epiworldR` 0.19.0 at commit `ce1cb0f`, the builds behind the outputs in `scenarios/` (Figure 4). In these builds, the incubation, prodromal, and rash stages are geometric (each day, an agent leaves the stage with probability one over its mean). Later development builds of `measles` 0.4.1, from [UofUEpiBio/measles#69](https://github.com/UofUEpiBio/measles/pull/69) on, draw lognormal stage durations and change the results under the same version number; `template.qmd` stops if one of them, or a version older than 0.4.1, is installed, and each report ends with the session information.
 
 ### Scenarios ([`Makefile`](./Makefile))
 
@@ -90,7 +90,7 @@ The analyses are set up to be run with `measles` 0.4.1 or later; `template.qmd` 
 | `make sensitivity_rash_redux` | POLYMOD | 9 | 0, 0.25, 0.5, 0.75, 1 × 0, 0.25, 0.5, 0.75, 1 | 0.0 | 0.9 |
 
 Each report runs two scenarios: with quarantine (21 days) and without quarantine (`Quarantine period` set to −1).
-`make population_immunity` writes the R0 = 9 outputs to `population_immunity/` and a concise final-size table to `population_immunity/summary.{csv,md}`. The table uses the same three arms as Figure 4: no interventions and self-isolation only use the no-quarantine run; self-isolation with quarantine uses the quarantine run.
+`make population_immunity` also writes the final outbreak sizes of the three Figure 4 arms to `population_immunity/summary.csv`.
 
 ### Transmission model (`ModelMeaslesMixing()`, [`template.qmd`](./template.qmd))
 

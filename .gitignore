@@ -14,10 +14,3 @@ sensitivity_*/
 # Tests and figure scripts
 !tests/tinytest/*.R
 !Figure_Data/*.R
-
-# Committed R0 = 9 population-immunity re-run and its concise summary
-!population_immunity/
-population_immunity/*
-!population_immunity/*.rds
-!population_immunity/summary.csv
-!population_immunity/summary.md

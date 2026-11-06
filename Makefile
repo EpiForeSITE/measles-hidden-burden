@@ -17,9 +17,7 @@ VAX_ADULTS_VALUES = baseline 78pct 86pct 93pct
 # Main target to run the paper models
 scenarios:
 	@for r0 in $(R0_VALUES); do \
-		R0=$$r0 RASH_CONTACT_REDUX=0.00 QT_SUCCESS=0.00  make report && \
-		R0=$$r0 RASH_CONTACT_REDUX=0.50 QT_SUCCESS=0.00  make report && \
-		R0=$$r0 RASH_CONTACT_REDUX=0.75 QT_SUCCESS=0.25  make report; \
+		R0=$$r0 $(MAKE) focal_scenarios || exit 1; \
 	done
 
 # The three intervention scenarios at the current R0 and vaccination setting.
@@ -28,12 +26,10 @@ focal_scenarios:
 	RASH_CONTACT_REDUX=0.50 QT_SUCCESS=0.00 make report
 	RASH_CONTACT_REDUX=0.75 QT_SUCCESS=0.25 make report
 
-# Population-immunity scenarios requested for the R0 = 9 re-run. Each adult
-# vaccination assumption is evaluated for the three focal intervention
-# scenarios, with and without quarantine as part of each report.
+# The three focal scenarios at R0 = 9 for each adult vaccination assumption
 population_immunity:
 	@for vax_adults in $(VAX_ADULTS_VALUES); do \
-		TARGET_DIR=population_immunity R0=9 VAX_ADULTS=$$vax_adults $(MAKE) focal_scenarios; \
+		TARGET_DIR=population_immunity R0=9 VAX_ADULTS=$$vax_adults $(MAKE) focal_scenarios || exit 1; \
 	done
 	Rscript Figure_Data/PopulationImmunity.R population_immunity
 
