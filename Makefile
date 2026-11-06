@@ -12,6 +12,7 @@ VAX_ADULTS ?= baseline
 TARGET_DIR ?= scenarios
 
 R0_VALUES = 5 7 9 11 13 15 17
+VAX_ADULTS_VALUES = baseline 78pct 86pct 93pct
 
 # Main target to run the paper models
 scenarios:
@@ -20,6 +21,21 @@ scenarios:
 		R0=$$r0 RASH_CONTACT_REDUX=0.50 QT_SUCCESS=0.00  make report && \
 		R0=$$r0 RASH_CONTACT_REDUX=0.75 QT_SUCCESS=0.25  make report; \
 	done
+
+# The three intervention scenarios at the current R0 and vaccination setting.
+focal_scenarios:
+	RASH_CONTACT_REDUX=0.00 QT_SUCCESS=0.00 make report
+	RASH_CONTACT_REDUX=0.50 QT_SUCCESS=0.00 make report
+	RASH_CONTACT_REDUX=0.75 QT_SUCCESS=0.25 make report
+
+# Population-immunity scenarios requested for the R0 = 9 re-run. Each adult
+# vaccination assumption is evaluated for the three focal intervention
+# scenarios, with and without quarantine as part of each report.
+population_immunity:
+	@for vax_adults in $(VAX_ADULTS_VALUES); do \
+		TARGET_DIR=population_immunity R0=9 VAX_ADULTS=$$vax_adults $(MAKE) focal_scenarios; \
+	done
+	Rscript Figure_Data/PopulationImmunity.R population_immunity
 
 # Population, contact matrices, and vaccination data (see data/utaz_data.R)
 data:
@@ -87,4 +103,4 @@ sensitivity_rash_redux:
 		done; \
 	done
 
-.PHONY: data test figures scenarios report clean sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux sensitivity_analysis
+.PHONY: data test figures scenarios focal_scenarios report clean population_immunity sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux sensitivity_analysis

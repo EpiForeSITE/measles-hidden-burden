@@ -42,6 +42,7 @@ The main scenarios (POLYMOD contacts) and the sensitivity analyses are run with:
 
 ```bash
 make scenarios               # R0 = 5, 7, ..., 17; results in scenarios/
+make population_immunity     # R0 = 9, four adult-vaccination assumptions
 make sensitivity_epistorm    # same, with the Epistorm-Mix contact matrix
 make sensitivity_rash_redux  # R0 = 9, grid of rash contact reduction x contact-tracing success
 ```
@@ -84,10 +85,12 @@ The analyses are set up to be run with `measles` 0.4.1 or later; `template.qmd` 
 | Set | Contact matrix | R0 | Rash contact reduction / contact-tracing success | Isolation willingness | Quarantine willingness |
 |---|---|---|---|---|---|
 | `make scenarios` (main) | POLYMOD | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 |
+| `make population_immunity` | POLYMOD | 9 | Same three focal scenarios, each with `baseline`, `78pct`, `86pct`, and `93pct` adult vaccination | 0.0 | 0.9 |
 | `make sensitivity_epistorm` | Epistorm-Mix | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 |
 | `make sensitivity_rash_redux` | POLYMOD | 9 | 0, 0.25, 0.5, 0.75, 1 × 0, 0.25, 0.5, 0.75, 1 | 0.0 | 0.9 |
 
 Each report runs two scenarios: with quarantine (21 days) and without quarantine (`Quarantine period` set to −1).
+`make population_immunity` writes the R0 = 9 outputs to `population_immunity/` and a concise final-size table to `population_immunity/summary.{csv,md}`. The table uses the same three arms as Figure 4: no interventions and self-isolation only use the no-quarantine run; self-isolation with quarantine uses the quarantine run.
 
 ### Transmission model (`ModelMeaslesMixing()`, [`template.qmd`](./template.qmd))
 
