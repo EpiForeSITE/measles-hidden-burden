@@ -31,7 +31,7 @@ population_immunity:
 	@for vax_adults in $(VAX_ADULTS_VALUES); do \
 		TARGET_DIR=population_immunity R0=9 VAX_ADULTS=$$vax_adults $(MAKE) focal_scenarios || exit 1; \
 	done
-	Rscript Figure_Data/PopulationImmunity.R population_immunity
+	quarto render population_immunity/README.qmd
 
 # Population, contact matrices, and vaccination data (see data/utaz_data.R)
 data:
@@ -87,6 +87,7 @@ PROB_VALUES = 0.0 0.25 0.5 0.75 1.0
 
 sensitivity_epistorm:
 	TARGET_DIR=sensitivity_epistorm EPISTORM=TRUE $(MAKE) scenarios
+	quarto render sensitivity_epistorm/README.qmd
 
 sensitivity_rash_redux:
 	for prob0 in $(PROB_VALUES); do \
@@ -98,5 +99,6 @@ sensitivity_rash_redux:
 			$(MAKE) report; \
 		done; \
 	done
+	quarto render sensitivity_rash_redux/README.qmd
 
 .PHONY: data test figures scenarios focal_scenarios report clean population_immunity sensitivity_r0 sensitivity_epistorm sensitivity_rash_redux sensitivity_analysis

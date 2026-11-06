@@ -1,0 +1,92 @@
+---
+title: "Sensitivity analysis: contact matrix (Epistorm-Mix)"
+format: gfm
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    dev: [png, pdf]
+    dpi: 300
+---
+
+```{r}
+#| label: setup
+library(data.table)
+library(ggplot2)
+library(knitr)
+source(file.path("..", "Figure_Data", "FigureABM.R"))
+
+R0_VALUES <- c(5, 7, 9, 11, 13, 15, 17)
+MATRICES  <- c(POLYMOD = "../scenarios", "Epistorm-Mix" = ".")
+
+fmt <- function(x) formatC(round(x), format = "d", big.mark = ",")
+```
+
+```{r}
+#| label: data
+sizes <- rbindlist(lapply(names(MATRICES), function(m) {
+  rbindlist(lapply(R0_VALUES, function(r0) {
+    s <- abm_summaries(MATRICES[[m]], r0, epistorm = m == "Epistorm-Mix")
+    s$final[,
+      .(
+        median = median(outbreak_size),
+        q25    = quantile(outbreak_size, 0.25, names = FALSE),
+        q75    = quantile(outbreak_size, 0.75, names = FALSE)
+      ),
+      by = scenario
+    ][s$runs, on = "scenario"][, `:=`(matrix = m, r0 = r0)]
+  }))
+}))
+sizes[, matrix := factor(matrix, names(MATRICES))]
+```
+
+The three focal scenarios of Figure 4 for R0 = 5, 7, ..., 17 with the Epistorm-Mix contact matrix (`make sensitivity_epistorm`), against the same scenarios with the POLYMOD matrix of the main analysis (`make scenarios`, in `scenarios/`). Each scenario has 1,000 runs; runs with fewer than `r MIN_OUTBREAK_SIZE` cases are excluded as early extinctions. As in Figure 4, self-isolation with quarantine uses the run with quarantine and the other two scenarios the run without.
+
+```{r}
+#| label: tbl-epistorm
+sizes[, cell := sprintf("%s (%s-%s)", fmt(median), fmt(q25), fmt(q75))]
+
+tab <- dcast(
+  sizes,
+  r0 + scenario ~ matrix,
+  value.var = c("retained", "cell")
+)
+setorder(tab, r0, scenario)
+
+kable(
+  tab[, .(
+    r0, scenario,
+    retained_POLYMOD, cell_POLYMOD,
+    `retained_Epistorm-Mix`, `cell_Epistorm-Mix`
+  )],
+  col.names = c(
+    "R0", "Scenario",
+    "Retained runs, POLYMOD", "Infections, POLYMOD",
+    "Retained runs, Epistorm-Mix", "Infections, Epistorm-Mix"
+  ),
+  align     = "rlrrrr",
+  caption   = paste(
+    "Final outbreak size at day 365, median (interquartile range) across",
+    "the retained runs, by contact matrix."
+  )
+)
+```
+
+```{r}
+#| label: fig-epistorm
+#| fig-width: 9
+#| fig-height: 4
+#| fig-cap: "Final outbreak size at day 365 by R0 and contact matrix: median and interquartile range across the retained runs."
+ggplot(sizes, aes(r0, median, color = scenario)) +
+  geom_line(linewidth = 0.5) +
+  geom_pointrange(aes(ymin = q25, ymax = q75), size = 0.35, linewidth = 0.8) +
+  facet_wrap(~matrix, nrow = 1) +
+  scale_color_manual(values = SCENARIO_COLORS) +
+  scale_x_continuous(breaks = R0_VALUES) +
+  scale_y_continuous(labels = fmt, limits = c(0, NA)) +
+  labs(x = "R0", y = "Infections") +
+  theme_figure4() +
+  theme(strip.text = element_text(face = "bold", color = INK_PRIMARY))
+```

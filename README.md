@@ -90,7 +90,9 @@ The analyses use `measles` 0.4.1 at commit `d1e87fe` and `epiworldR` 0.19.0 at c
 | `make sensitivity_rash_redux` | POLYMOD | 9 | 0, 0.25, 0.5, 0.75, 1 × 0, 0.25, 0.5, 0.75, 1 | 0.0 | 0.9 |
 
 Each report runs two scenarios: with quarantine (21 days) and without quarantine (`Quarantine period` set to −1).
-Each output also holds the infections by age group in each run (`infections_by_age`, `infections_by_age_no_quarantine`). `make population_immunity` also writes the final outbreak sizes of the three Figure 4 arms, in total and for children (under 18) and adults, to `population_immunity/summary.csv`, and compares the arm without interventions with the deterministic final sizes of the [`multigroup.vaccine` vignette](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/utaz_age_school.html) ("Alternate adult immunization assumptions") in `population_immunity/deterministic_comparison.{csv,png,pdf}`.
+Each output also holds the infections by age group in each run (`infections_by_age`, `infections_by_age_no_quarantine`).
+
+Each sensitivity analysis has a summary, with one table and one figure, in its directory: [`population_immunity/README.md`](./population_immunity/README.md) (with the deterministic final sizes of the [`multigroup.vaccine` vignette](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/utaz_age_school.html) for reference), [`sensitivity_epistorm/README.md`](./sensitivity_epistorm/README.md), and [`sensitivity_rash_redux/README.md`](./sensitivity_rash_redux/README.md). Each `make` target renders its `README.qmd` after the runs; the figures are in `README_files/figure-commonmark/` as PNG and PDF.
 
 ### Transmission model (`ModelMeaslesMixing()`, [`template.qmd`](./template.qmd))
 
