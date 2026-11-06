@@ -90,7 +90,7 @@ The analyses use `measles` 0.4.1 at commit `d1e87fe` and `epiworldR` 0.19.0 at c
 | `make sensitivity_rash_redux` | POLYMOD | 9 | 0, 0.25, 0.5, 0.75, 1 × 0, 0.25, 0.5, 0.75, 1 | 0.0 | 0.9 |
 
 Each report runs two scenarios: with quarantine (21 days) and without quarantine (`Quarantine period` set to −1).
-`make population_immunity` also writes the final outbreak sizes of the three Figure 4 arms to `population_immunity/summary.csv`.
+Each output also holds the infections by age group in each run (`infections_by_age`, `infections_by_age_no_quarantine`). `make population_immunity` also writes the final outbreak sizes of the three Figure 4 arms, in total and for children (under 18) and adults, to `population_immunity/summary.csv`.
 
 ### Transmission model (`ModelMeaslesMixing()`, [`template.qmd`](./template.qmd))
 

@@ -348,7 +348,9 @@ measles_model |>
     ndays = 365,
     nsims = params$nsims,
     seed  = 8812,
-    saver = make_saver("outbreak_size", "hospitalizations", "reproductive"),
+    saver = make_saver(
+      "outbreak_size", "hospitalizations", "reproductive", "transmission"
+    ),
     nthreads = params$threads
   )
 ```
@@ -379,9 +381,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 12.00s (1000 runs)
-    Last run speed      : 15.20 million agents x day / second
-    Average run speed   : 174.01 million agents x day / second
+    Total elapsed t     : 11.00s (1000 runs)
+    Last run speed      : 37.77 million agents x day / second
+    Average run speed   : 184.22 million agents x day / second
     Rewiring            : off
     Last seed used      : 321912252
 
@@ -464,6 +466,19 @@ library(data.table)
 outbreak_size <- ans$outbreak_size |> as.data.table()
 hospitalizations <- ans$hospitalizations |> as.data.table()
 reproductive <- ans$reproductive |> as.data.table()
+
+# Infections by age group in each run. Agents are assigned to the age groups
+# in order (add_entities_from_dataframe()), so an agent's id gives its group;
+# the transmission records include the initial case.
+count_by_age <- function(transmission) {
+  tr <- as.data.table(transmission)
+  tr[, age_group := utaz$age_labels[
+    findInterval(target, cumsum(utaz$agepops)) + 1L
+  ]]
+  tr[, .(infections = .N), by = .(sim_num, age_group)]
+}
+
+infections_by_age <- count_by_age(ans$transmission)
 ```
 
 ## Reproductive number
@@ -656,7 +671,7 @@ measles_model |>
     ndays = 365,
     nsims = params$nsims,
     seed  = 8812,
-    saver = make_saver("outbreak_size", "hospitalizations"),
+    saver = make_saver("outbreak_size", "hospitalizations", "transmission"),
     nthreads = params$threads
   )
 ```
@@ -683,8 +698,8 @@ summary(measles_model)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
     Total elapsed t     : 23.00s (2000 runs)
-    Last run speed      : 39.66 million agents x day / second
-    Average run speed   : 180.38 million agents x day / second
+    Last run speed      : 27.53 million agents x day / second
+    Average run speed   : 183.45 million agents x day / second
     Rewiring            : off
     Last seed used      : 321912252
 
@@ -760,6 +775,8 @@ outbreak_size_no_quarantine <-
   ans_no_quarantine$outbreak_size |> as.data.table()
 hospitalizations_no_quarantine <-
   ans_no_quarantine$hospitalizations |> as.data.table()
+infections_by_age_no_quarantine <-
+  count_by_age(ans_no_quarantine$transmission)
 ```
 
 We can compare both using a simple boxplot:
