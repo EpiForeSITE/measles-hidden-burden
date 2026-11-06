@@ -19,6 +19,7 @@ scenarios:
 	@for r0 in $(R0_VALUES); do \
 		R0=$$r0 $(MAKE) focal_scenarios || exit 1; \
 	done
+	quarto render $(TARGET_DIR)/README.qmd
 
 # The three intervention scenarios at the current R0 and vaccination setting.
 focal_scenarios:
@@ -87,7 +88,6 @@ PROB_VALUES = 0.0 0.25 0.5 0.75 1.0
 
 sensitivity_epistorm:
 	TARGET_DIR=sensitivity_epistorm EPISTORM=TRUE $(MAKE) scenarios
-	quarto render sensitivity_epistorm/README.qmd
 
 sensitivity_rash_redux:
 	for prob0 in $(PROB_VALUES); do \

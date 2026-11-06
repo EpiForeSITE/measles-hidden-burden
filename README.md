@@ -82,17 +82,17 @@ The analyses use `measles` 0.4.1 at commit `d1e87fe` and `epiworldR` 0.19.0 at c
 
 ### Scenarios ([`Makefile`](./Makefile))
 
-| Set | Contact matrix | R0 | Rash contact reduction / contact-tracing success | Isolation willingness | Quarantine willingness |
-|---|---|---|---|---|---|
-| `make scenarios` (main) | POLYMOD | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 |
-| `make population_immunity` | POLYMOD | 9 | Same three focal scenarios, each with `baseline`, `78pct`, `86pct`, and `93pct` adult vaccination | 0.0 | 0.9 |
-| `make sensitivity_epistorm` | Epistorm-Mix | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 |
-| `make sensitivity_rash_redux` | POLYMOD | 9 | 0, 0.25, 0.5, 0.75, 1 × 0, 0.25, 0.5, 0.75, 1 | 0.0 | 0.9 |
+| Set | Contact matrix | R0 | Rash contact reduction / contact-tracing success | Isolation willingness | Quarantine willingness | Summary |
+|---|---|---|---|---|---|---|
+| `make scenarios` (main) | POLYMOD | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 | [`scenarios/README.md`](./scenarios/README.md) |
+| `make population_immunity` | POLYMOD | 9 | Same three focal scenarios, each with `baseline`, `78pct`, `86pct`, and `93pct` adult vaccination | 0.0 | 0.9 | [`population_immunity/README.md`](./population_immunity/README.md) |
+| `make sensitivity_epistorm` | Epistorm-Mix | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 | [`sensitivity_epistorm/README.md`](./sensitivity_epistorm/README.md) |
+| `make sensitivity_rash_redux` | POLYMOD | 9 | 0, 0.25, 0.5, 0.75, 1 × 0, 0.25, 0.5, 0.75, 1 | 0.0 | 0.9 | [`sensitivity_rash_redux/README.md`](./sensitivity_rash_redux/README.md) |
 
 Each report runs two scenarios: with quarantine (21 days) and without quarantine (`Quarantine period` set to −1).
-Each output also holds the infections by age group in each run (`infections_by_age`, `infections_by_age_no_quarantine`).
+The `population_immunity/` outputs also hold the infections by age group in each run (`infections_by_age`, `infections_by_age_no_quarantine`).
 
-Each sensitivity analysis has a summary, with one table and one figure, in its directory: [`population_immunity/README.md`](./population_immunity/README.md) (with the deterministic final sizes of the [`multigroup.vaccine` vignette](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/utaz_age_school.html) for reference), [`sensitivity_epistorm/README.md`](./sensitivity_epistorm/README.md), and [`sensitivity_rash_redux/README.md`](./sensitivity_rash_redux/README.md). Each `make` target renders its `README.qmd` after the runs; the figures are in `README_files/figure-commonmark/` as PNG and PDF.
+Each set has a summary (Summary column) with one table and one figure, rendered from the `README.qmd` in its directory by its `make` target after the runs; the figures are in `README_files/figure-commonmark/` as PNG and PDF. The population-immunity summary includes the deterministic final sizes of the [`multigroup.vaccine` vignette](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/utaz_age_school.html) for reference.
 
 ### Transmission model (`ModelMeaslesMixing()`, [`template.qmd`](./template.qmd))
 
