@@ -1,0 +1,13 @@
+vax_adults,group,abm_median,abm_q25,abm_q75,deterministic
+baseline,Total,2700,2686,2715,2787
+78pct,Total,2295,2280,2311,2395
+86pct,Total,2072,2059,2087,2157
+93pct,Total,1898,1885,1913,1968
+baseline,Children,1739,1731,1747,1777
+78pct,Children,1720.5,1713,1730,1764
+86pct,Children,1710,1700,1720,1754
+93pct,Children,1699,1689,1709,1746
+baseline,Adults,961,951,972,1010
+78pct,Adults,575,564,586,631
+86pct,Adults,363,352.5,373,403
+93pct,Adults,200,192,208,222

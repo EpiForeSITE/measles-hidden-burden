@@ -1,13 +1,13 @@
-scenario,median,q25,q75,runs,retained,child,adult,vax_adults,child_adult_ratio
-No interventions,2700,2686,2715,1000,777,1739,961,baseline,1.8
-Self-isolation only,2567,2547,2585,1000,703,1680,887,baseline,1.9
-Self-isolation with quarantine,2138,2106,2167,1000,594,1447,690.5,baseline,2.1
-No interventions,2295,2280,2311,1000,726,1720.5,575,78pct,3
-Self-isolation only,2157,2138,2177,1000,646,1656,500.5,78pct,3.3
-Self-isolation with quarantine,1781,1750,1806,1000,532,1415,366,78pct,3.9
-No interventions,2072,2059,2087,1000,691,1710,363,86pct,4.7
-Self-isolation only,1955,1937,1972,1000,617,1642,312,86pct,5.3
-Self-isolation with quarantine,1626,1597,1652,1000,499,1397,230,86pct,6.1
-No interventions,1898,1885,1913,1000,669,1699,200,93pct,8.5
-Self-isolation only,1800,1783,1816,1000,603,1629,171,93pct,9.5
-Self-isolation with quarantine,1508,1483,1534,1000,481,1383,126,93pct,11
+vax_adults,scenario,runs,retained,median,q25,q75,child,adult,child_adult_ratio
+baseline,No interventions,1000,777,2700,2686,2715,1739,961,1.8
+baseline,Self-isolation only,1000,703,2567,2547,2585,1680,887,1.9
+baseline,Self-isolation with quarantine,1000,594,2138,2106,2167,1447,690.5,2.1
+78pct,No interventions,1000,726,2295,2280,2311,1720.5,575,3
+78pct,Self-isolation only,1000,646,2157,2138,2177,1656,500.5,3.3
+78pct,Self-isolation with quarantine,1000,532,1781,1750,1806,1415,366,3.9
+86pct,No interventions,1000,691,2072,2059,2087,1710,363,4.7
+86pct,Self-isolation only,1000,617,1955,1937,1972,1642,312,5.3
+86pct,Self-isolation with quarantine,1000,499,1626,1597,1652,1397,230,6.1
+93pct,No interventions,1000,669,1898,1885,1913,1699,200,8.5
+93pct,Self-isolation only,1000,603,1800,1783,1816,1629,171,9.5
+93pct,Self-isolation with quarantine,1000,481,1508,1483,1534,1383,126,11
