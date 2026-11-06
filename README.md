@@ -1,6 +1,6 @@
 # Utah-Arizona Border Simulations
 
-This repository contains the R code needed to reproduce the analyses in paper *"Hidden Burden of a Measles Outbreak Revealed by Genomic and Transmission Models"*. Dependencies include the [`measles`](https://github.com/UofUEpiBio/measles) R package (version 0.4.1 or later, built on [`epiworldR`](https://github.com/UofUEpiBio/epiworldR) 0.19.0 or later, with `clone_epi()`, both installed from [r-universe](https://uofuepibio.r-universe.dev) in the dev container, see [`.devcontainer/Containerfile`](./.devcontainer/Containerfile)), [`multigroup.vaccine`](https://github.com/EpiForeSITE/multigroup-vaccine) (pinned to commit `ddd9201`) and [`socialmixr`](https://cran.r-project.org/package=socialmixr) (pinned to 0.7.0) for the population, contact, and vaccination data, [Quarto](https://quarto.org) for rendering reports, `ggplot2` for visualization, and `data.table` for data wrangling.
+This repository contains the R code needed to reproduce the analyses in paper *"Hidden Burden of a Measles Outbreak Revealed by Genomic and Transmission Models"*. Dependencies include the [`measles`](https://github.com/UofUEpiBio/measles) R package (0.4.1 at commit [`d1e87fe`](https://github.com/UofUEpiBio/measles/commit/d1e87fed204ebe820620759fa1b85cdb9d2e0b03), built on [`epiworldR`](https://github.com/UofUEpiBio/epiworldR) 0.19.0 at commit [`ce1cb0f`](https://github.com/UofUEpiBio/epiworldR/commit/ce1cb0f088b9a3a19674fb6598b2c42780c72b12); both pinned in the dev container, see [`.devcontainer/Containerfile`](./.devcontainer/Containerfile)), [`multigroup.vaccine`](https://github.com/EpiForeSITE/multigroup-vaccine) (pinned to commit `ddd9201`) and [`socialmixr`](https://cran.r-project.org/package=socialmixr) (pinned to 0.7.0) for the population, contact, and vaccination data, [Quarto](https://quarto.org) for rendering reports, `ggplot2` for visualization, and `data.table` for data wrangling.
 
 ## Container
 
@@ -42,6 +42,7 @@ The main scenarios (POLYMOD contacts) and the sensitivity analyses are run with:
 
 ```bash
 make scenarios               # R0 = 5, 7, ..., 17; results in scenarios/
+make population_immunity     # R0 = 9, four adult-vaccination assumptions
 make sensitivity_epistorm    # same, with the Epistorm-Mix contact matrix
 make sensitivity_rash_redux  # R0 = 9, grid of rash contact reduction x contact-tracing success
 ```
@@ -77,17 +78,21 @@ Each scenario output holds a run with quarantine and one without. "Self-isolatio
 
 This section lists every parameter used in the analyses. It follows the canonical, cited table in the `measles` R package: [`measles_parameters.csv`](https://github.com/UofUEpiBio/measles/blob/main/inst/extdata/measles_parameters.csv) (see also the [parameters vignette](https://github.com/UofUEpiBio/measles/blob/main/vignettes/parameters.qmd)). See [EpiForeSITE/measles#5](https://github.com/EpiForeSITE/measles/issues/5) for background.
 
-The analyses are set up to be run with `measles` 0.4.1 or later; `template.qmd` stops if an older version is installed, and each report ends with the session information.
+The analyses use `measles` 0.4.1 at commit `d1e87fe` and `epiworldR` 0.19.0 at commit `ce1cb0f`, the builds behind the outputs in `scenarios/` (Figure 4). In these builds, the incubation, prodromal, and rash stages are geometric (each day, an agent leaves the stage with probability one over its mean). Later development builds of `measles` 0.4.1, from [UofUEpiBio/measles#69](https://github.com/UofUEpiBio/measles/pull/69) on, draw lognormal stage durations and change the results under the same version number; `template.qmd` stops if one of them, or a version older than 0.4.1, is installed, and each report ends with the session information.
 
 ### Scenarios ([`Makefile`](./Makefile))
 
-| Set | Contact matrix | R0 | Rash contact reduction / contact-tracing success | Isolation willingness | Quarantine willingness |
-|---|---|---|---|---|---|
-| `make scenarios` (main) | POLYMOD | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 |
-| `make sensitivity_epistorm` | Epistorm-Mix | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 |
-| `make sensitivity_rash_redux` | POLYMOD | 9 | 0, 0.25, 0.5, 0.75, 1 × 0, 0.25, 0.5, 0.75, 1 | 0.0 | 0.9 |
+| Set | Contact matrix | R0 | Rash contact reduction / contact-tracing success | Isolation willingness | Quarantine willingness | Summary |
+|---|---|---|---|---|---|---|
+| `make scenarios` (main) | POLYMOD | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 | [`scenarios/README.md`](./scenarios/README.md) |
+| `make population_immunity` | POLYMOD | 9 | Same three focal scenarios, each with `baseline`, `78pct`, `86pct`, and `93pct` adult vaccination | 0.0 | 0.9 | [`population_immunity/README.md`](./population_immunity/README.md) |
+| `make sensitivity_epistorm` | Epistorm-Mix | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 | [`sensitivity_epistorm/README.md`](./sensitivity_epistorm/README.md) |
+| `make sensitivity_rash_redux` | POLYMOD | 9 | 0, 0.25, 0.5, 0.75, 1 × 0, 0.25, 0.5, 0.75, 1 | 0.0 | 0.9 | [`sensitivity_rash_redux/README.md`](./sensitivity_rash_redux/README.md) |
 
 Each report runs two scenarios: with quarantine (21 days) and without quarantine (`Quarantine period` set to −1).
+The `population_immunity/` outputs also hold the infections by age group in each run (`infections_by_age`, `infections_by_age_no_quarantine`).
+
+Each set has a summary (Summary column) with one table and one figure, rendered from the `README.qmd` in its directory by its `make` target after the runs; the figures are in `README_files/figure-commonmark/` as PNG and PDF. The population-immunity summary includes the deterministic final sizes of the [`multigroup.vaccine` vignette](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/utaz_age_school.html) for reference.
 
 ### Transmission model (`ModelMeaslesMixing()`, [`template.qmd`](./template.qmd))
 

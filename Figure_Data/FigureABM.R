@@ -104,14 +104,22 @@ abm_summaries <- function(
     r0         = 9,
     paper_arms = FALSE,
     min_size   = MIN_OUTBREAK_SIZE,
-    vax_adults = "baseline"
+    vax_adults = "baseline",
+    epistorm   = FALSE
 ) {
   scenarios <- copy(FOCAL_SCENARIOS)
   if (paper_arms) scenarios[, arm := "outbreak_size_no_quarantine"]
 
   sims <- rbindlist(lapply(seq_len(nrow(scenarios)), function(i) {
     s <- scenarios[i]
-    f <- scenario_file(dir, r0, s$rash, s$ct, vax_adults = vax_adults)
+    f <- scenario_file(
+      dir,
+      r0,
+      s$rash,
+      s$ct,
+      vax_adults = vax_adults,
+      epistorm   = epistorm
+    )
     d <- as.data.table(readRDS(f)[[s$arm]])
     d[, scenario := s$label]
     d[, .(scenario, sim_num, date, outbreak_size = as.numeric(outbreak_size))]

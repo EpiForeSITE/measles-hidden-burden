@@ -68,7 +68,10 @@ For the data, we need two datasets: information about the population distributio
 stopifnot(
   packageVersion("measles") >= "0.4.1",
   packageVersion("epiworldR") >= "0.19.0",
-  exists("clone_epi", envir = asNamespace("epiworldR"))
+  exists("clone_epi", envir = asNamespace("epiworldR")),
+  # Builds from UofUEpiBio/measles#69 on draw lognormal stage durations
+  "measles build newer than the pinned one (see the README)" =
+    !"incubation_period_sd" %in% names(formals(ModelMeaslesMixing))
 )
 vax_file <- sprintf(
   "data/utaz_vaccination_adults_%s.rds",
@@ -299,7 +302,9 @@ measles_model |>
     ndays = 365,
     nsims = params$nsims,
     seed  = 8812,
-    saver = make_saver("outbreak_size", "hospitalizations", "reproductive"),
+    saver = make_saver(
+      "outbreak_size", "hospitalizations", "reproductive", "transmission"
+    ),
     nthreads = params$threads
   )
 ```
@@ -331,6 +336,19 @@ library(data.table)
 outbreak_size <- ans$outbreak_size |> as.data.table()
 hospitalizations <- ans$hospitalizations |> as.data.table()
 reproductive <- ans$reproductive |> as.data.table()
+
+# Infections by age group in each run. Agents are assigned to the age groups
+# in order (add_entities_from_dataframe()), so an agent's id gives its group;
+# the transmission records include the initial case.
+count_by_age <- function(transmission) {
+  tr <- as.data.table(transmission)
+  tr[, age_group := utaz$age_labels[
+    findInterval(target, cumsum(utaz$agepops)) + 1L
+  ]]
+  tr[, .(infections = .N), by = .(sim_num, age_group)]
+}
+
+infections_by_age <- count_by_age(ans$transmission)
 ```
 
 ## Reproductive number
@@ -491,7 +509,7 @@ measles_model |>
     ndays = 365,
     nsims = params$nsims,
     seed  = 8812,
-    saver = make_saver("outbreak_size", "hospitalizations"),
+    saver = make_saver("outbreak_size", "hospitalizations", "transmission"),
     nthreads = params$threads
   )
 
@@ -513,6 +531,8 @@ outbreak_size_no_quarantine <-
   ans_no_quarantine$outbreak_size |> as.data.table()
 hospitalizations_no_quarantine <-
   ans_no_quarantine$hospitalizations |> as.data.table()
+infections_by_age_no_quarantine <-
+  count_by_age(ans_no_quarantine$transmission)
 ```
 
 We can compare both using a simple boxplot:
@@ -559,7 +579,9 @@ saveRDS(
     outbreak_size = outbreak_size,
     outbreak_size_no_quarantine = outbreak_size_no_quarantine,
     hospitalizations = hospitalizations,
-    hospitalizations_no_quarantine = hospitalizations_no_quarantine
+    hospitalizations_no_quarantine = hospitalizations_no_quarantine,
+    infections_by_age = infections_by_age,
+    infections_by_age_no_quarantine = infections_by_age_no_quarantine
   ),
   file = sprintf(
     "r0_%.2f-epistorm_%s-rash_contact_redux_%.2f-isolation_willingness_%.2f-quarantine_willingness_%.2f-contact_tracing_success_%.2f-vax_adults_%s.rds",
