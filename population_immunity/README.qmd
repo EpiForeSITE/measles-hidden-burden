@@ -16,7 +16,6 @@ knitr:
 library(data.table)
 library(ggplot2)
 library(knitr)
-library(multigroup.vaccine)
 source(file.path("..", "Figure_Data", "FigureABM.R"))
 
 ASSUMPTIONS <- c(
@@ -27,8 +26,6 @@ ASSUMPTIONS <- c(
 )
 ADULTS <- c("18to24", "25to44", "45to69", "70+")
 GROUPS <- c("Total", "Children", "Adults")
-
-DETERMINISTIC <- "Deterministic, no interventions"
 
 fmt <- function(x) formatC(round(x), format = "d", big.mark = ",")
 ```
@@ -55,7 +52,7 @@ runs <- rbindlist(lapply(names(ASSUMPTIONS), function(v) {
 
 retained <- runs[Total >= MIN_OUTBREAK_SIZE]
 
-abm <- melt(
+sizes <- melt(
   retained,
   id.vars       = c("vax_adults", "model"),
   measure.vars  = GROUPS,
@@ -69,57 +66,19 @@ abm <- melt(
   by = .(vax_adults, model, group)
 ]
 
-# Deterministic final sizes, as in the multigroup.vaccine vignette
-cm  <- readRDS(file.path("..", "data", "utaz_contacts_polymod.rds"))
-det <- rbindlist(lapply(names(ASSUMPTIONS), function(v) {
-  d <- readRDS(
-    file.path("..", "data", sprintf("utaz_vaccination_adults_%s.rds", v))
-  )
-  efficacy <- ifelse(
-    d$age_labels %in% c("under1", "1to4"),
-    0.93,
-    ifelse(d$age_labels == "70+", 1, 0.97)
-  )
-  fs <- finalsize(
-    popsize       = d$agepops,
-    R0            = 9,
-    contactmatrix = cm,
-    relsusc       = 1,
-    reltransm     = 1,
-    initR         = rep(0, nrow(d)),
-    initI         = as.numeric(d$age_labels == "18to24"),
-    initV         = round(d$vacc_rate * d$agepops * efficacy)
-  )
-  data.table(
-    vax_adults = v,
-    model      = DETERMINISTIC,
-    group      = GROUPS,
-    median     = c(
-      sum(fs),
-      sum(fs[!d$age_labels %in% ADULTS]),
-      sum(fs[d$age_labels %in% ADULTS])
-    )
-  )
-}))
-
-sizes <- rbind(abm, det, fill = TRUE)
 sizes[, vax_adults := factor(vax_adults, names(ASSUMPTIONS), ASSUMPTIONS)]
-sizes[, model := factor(model, c(FOCAL_SCENARIOS$label, DETERMINISTIC))]
+sizes[, model := factor(model, FOCAL_SCENARIOS$label)]
 sizes[, group := factor(group, GROUPS)]
 ```
 
-The three focal scenarios of Figure 4 at R0 = 9 (`make population_immunity`), for each assumption on the vaccination coverage of adults aged 18 to 69: the current one (`baseline`) and the alternate adult immunization assumptions of the [`multigroup.vaccine` vignette](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/utaz_age_school.html), with 78%, 86%, and 93% coverage. Each scenario has 1,000 runs; runs with fewer than `r MIN_OUTBREAK_SIZE` cases are excluded as early extinctions. As in Figure 4, self-isolation with quarantine uses the run with quarantine and the other two scenarios the run without. For reference, the table and figure include the deterministic final sizes of the vignette's compartmental model (no interventions). Children are those under 18.
+The three focal scenarios of Figure 4 at R0 = 9 (`make population_immunity`), for each assumption on the vaccination coverage of adults aged 18 to 69: the current one (`baseline`) and the alternate adult immunization assumptions of the [`multigroup.vaccine` vignette](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/utaz_age_school.html), with 78%, 86%, and 93% coverage. Each scenario has 1,000 runs; runs with fewer than `r MIN_OUTBREAK_SIZE` cases are excluded as early extinctions. As in Figure 4, self-isolation with quarantine uses the run with quarantine and the other two scenarios the run without. Children are those under 18.
 
 ```{r}
 #| label: tbl-population-immunity
 cells <- dcast(
   sizes[, .(
     vax_adults, model, group,
-    value = ifelse(
-      is.na(q25),
-      fmt(median),
-      sprintf("%s (%s-%s)", fmt(median), fmt(q25), fmt(q75))
-    )
+    value = sprintf("%s (%s-%s)", fmt(median), fmt(q25), fmt(q75))
   )],
   vax_adults + model ~ group,
   value.var = "value"
@@ -128,19 +87,21 @@ ratio <- dcast(sizes, vax_adults + model ~ group, value.var = "median")[,
   .(vax_adults, model, ratio = sprintf("%.1f", Children / Adults))
 ]
 n_retained <- retained[, .(retained = fmt(.N)), by = .(vax_adults, model)]
-n_retained[, vax_adults := factor(vax_adults, names(ASSUMPTIONS), ASSUMPTIONS)]
+n_retained[, `:=`(
+  vax_adults = factor(vax_adults, names(ASSUMPTIONS), ASSUMPTIONS),
+  model      = factor(model, levels(sizes$model))
+)]
 
 tab <- n_retained[
   cells[ratio, on = .(vax_adults, model)],
   on = .(vax_adults, model)
 ]
-tab[, model := factor(model, levels(sizes$model))]
 setorder(tab, vax_adults, model)
 
 kable(
   tab[, .(
     vax_adults, model,
-    retained = ifelse(is.na(retained), "", retained),
+    retained,
     Total, Children, Adults, ratio
   )],
   col.names = c(
@@ -159,15 +120,17 @@ kable(
 #| label: fig-population-immunity
 #| fig-width: 9
 #| fig-height: 4
-#| fig-cap: "Final outbreak size at day 365 by adult vaccination assumption: medians across the retained runs (interquartile ranges in the table) and deterministic final sizes."
-colors <- c(SCENARIO_COLORS, setNames(INK_SECONDARY, DETERMINISTIC))
+#| fig-cap: "Final outbreak size at day 365 by adult vaccination assumption: medians and interquartile ranges across the retained runs."
+dodge <- position_dodge(width = 0.3)
 
-ggplot(
-  sizes,
-  aes(vax_adults, median, color = model, shape = model, group = model)
-) +
-  geom_line(linewidth = 0.5) +
-  geom_point(size = 2.4, stroke = 1, fill = "white") +
+ggplot(sizes, aes(vax_adults, median, color = model, group = model)) +
+  geom_line(linewidth = 0.5, position = dodge) +
+  geom_pointrange(
+    aes(ymin = q25, ymax = q75),
+    size      = 0.35,
+    linewidth = 0.8,
+    position  = dodge
+  ) +
   facet_wrap(
     ~group,
     nrow     = 1,
@@ -177,11 +140,9 @@ ggplot(
       Adults   = "Adults (18+)"
     ))
   ) +
-  scale_color_manual(values = colors) +
-  scale_shape_manual(values = c(16, 16, 16, 23)) +
+  scale_color_manual(values = SCENARIO_COLORS) +
   scale_y_continuous(labels = fmt, limits = c(0, NA)) +
   labs(x = "Adult vaccination coverage (ages 18-69)", y = "Infections") +
-  guides(color = guide_legend(nrow = 2)) +
   theme_figure4() +
   theme(strip.text = element_text(face = "bold", color = INK_PRIMARY))
 ```

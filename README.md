@@ -92,7 +92,7 @@ The analyses use `measles` 0.4.1 at commit `d1e87fe` and `epiworldR` 0.19.0 at c
 Each report runs two scenarios: with quarantine (21 days) and without quarantine (`Quarantine period` set to −1).
 The `population_immunity/` outputs also hold the infections by age group in each run (`infections_by_age`, `infections_by_age_no_quarantine`).
 
-Each set has a summary (Summary column) with one table and one figure, rendered from the `README.qmd` in its directory by its `make` target after the runs; the figures are in `README_files/figure-commonmark/` as PNG and PDF. The population-immunity summary includes the deterministic final sizes of the [`multigroup.vaccine` vignette](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/utaz_age_school.html) for reference.
+Each set has a summary (Summary column) with one table and one figure, rendered from the `README.qmd` in its directory by its `make` target after the runs; the figures are in `README_files/figure-commonmark/` as PNG and PDF.
 
 ### Transmission model (`ModelMeaslesMixing()`, [`template.qmd`](./template.qmd))
 
