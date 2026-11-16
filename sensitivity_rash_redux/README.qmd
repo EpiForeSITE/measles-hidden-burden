@@ -1,0 +1,107 @@
+---
+title: "Sensitivity analysis: rash contact reduction and contact tracing (R0 = 9)"
+format: gfm
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    dev: [png, pdf]
+    dpi: 300
+---
+
+```{r}
+#| label: setup
+library(data.table)
+library(ggplot2)
+library(knitr)
+source(file.path("..", "Figure_Data", "FigureABM.R"))
+
+PROB_VALUES <- c(0, 0.25, 0.5, 0.75, 1)
+
+# Sequential blue ramp, steps 100 to 700 (dataviz reference palette)
+BLUES <- c(
+  "#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"
+)
+
+fmt <- function(x) formatC(round(x), format = "d", big.mark = ",")
+pct <- function(x) sprintf("%d%%", round(100 * x))
+```
+
+```{r}
+#| label: data
+grid <- CJ(rash = PROB_VALUES, ct = PROB_VALUES)
+
+sizes <- grid[,
+  {
+    d <- as.data.table(readRDS(scenario_file(".", 9, rash, ct))$outbreak_size)
+    final <- as.numeric(d[date == max(date)]$outbreak_size)
+    final <- final[final >= MIN_OUTBREAK_SIZE]
+    list(
+      retained = length(final),
+      median   = median(final),
+      q25      = quantile(final, 0.25, names = FALSE),
+      q75      = quantile(final, 0.75, names = FALSE)
+    )
+  },
+  by = .(rash, ct)
+]
+```
+
+The rash contact reduction (the share of contacts avoided after rash onset) and the contact-tracing success rate on a grid from 0 to 1 at R0 = 9 (`make sensitivity_rash_redux`), with a 21-day quarantine and 90% quarantine willingness; the run without quarantine is not used, since contact tracing only acts through quarantine. Each combination has 1,000 runs; runs with fewer than `r MIN_OUTBREAK_SIZE` cases are excluded as early extinctions. The main analysis uses 0.50 / 0 (self-isolation only) and 0.75 / 0.25 (self-isolation with quarantine). Between `r fmt(min(sizes$retained))` and `r fmt(max(sizes$retained))` runs are retained per combination.
+
+```{r}
+#| label: tbl-rash-redux
+sizes[, cell := sprintf("%s (%s-%s)", fmt(median), fmt(q25), fmt(q75))]
+tab <- dcast(sizes, rash ~ ct, value.var = "cell")
+
+kable(
+  tab[, rash := pct(rash)],
+  col.names = c(
+    "Rash contact reduction",
+    paste("Contact tracing", pct(PROB_VALUES))
+  ),
+  align     = "lrrrrr",
+  caption   = paste(
+    "Final outbreak size at day 365, median (interquartile range) across",
+    "the retained runs, by rash contact reduction (rows) and contact-tracing",
+    "success (columns)."
+  )
+)
+```
+
+```{r}
+#| label: fig-rash-redux
+#| fig-width: 6.5
+#| fig-height: 5
+#| fig-cap: "Median final outbreak size at day 365 across the retained runs, by rash contact reduction and contact-tracing success."
+ggplot(sizes, aes(factor(rash), factor(ct), fill = median)) +
+  geom_tile(color = "white", linewidth = 1) +
+  geom_text(
+    aes(
+      label = fmt(median),
+      color = median > mean(range(median))
+    ),
+    size = 3.4
+  ) +
+  scale_fill_gradientn(
+    colors = BLUES,
+    labels = fmt,
+    name   = "Median infections"
+  ) +
+  scale_color_manual(values = c("FALSE" = INK_PRIMARY, "TRUE" = "white")) +
+  scale_x_discrete(labels = function(x) pct(as.numeric(x))) +
+  scale_y_discrete(labels = function(x) pct(as.numeric(x))) +
+  guides(color = "none") +
+  coord_equal() +
+  labs(x = "Rash contact reduction", y = "Contact-tracing success") +
+  theme_figure4() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    axis.line.x        = element_blank(),
+    axis.ticks.x       = element_blank(),
+    legend.title       = element_text(color = INK_SECONDARY),
+    legend.key.width   = unit(1.6, "cm")
+  )
+```

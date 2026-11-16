@@ -31,15 +31,15 @@ setwd(old_wd)
 
 expect_equal(unname(status), c(0L, 0L), info = "data scripts run")
 
-committed <- list.files(data_dir, pattern = "^utaz_.*[.]rds$")
-built     <- list.files(file.path(build_dir, "data"), pattern = "^utaz_.*[.]rds$")
+committed <- list.files(data_dir, pattern = "^utaz_.*[.]csv$")
+built     <- list.files(file.path(build_dir, "data"), pattern = "^utaz_.*[.]csv$")
 
 expect_equal(sort(built), sort(committed))
 
 for (f in committed) {
   expect_equal(
-    readRDS(file.path(build_dir, "data", f)),
-    readRDS(file.path(data_dir, f)),
+    data.table::fread(file.path(build_dir, "data", f)),
+    data.table::fread(file.path(data_dir, f)),
     tolerance = 1e-10,
     info      = f
   )

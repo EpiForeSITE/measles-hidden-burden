@@ -1,6 +1,30 @@
 # Utah-Arizona Border Simulations
 
-This repository contains the R code needed to reproduce the analyses in paper *"Hidden Burden of a Measles Outbreak Revealed by Genomic and Transmission Models"*. Dependencies include the [`measles`](https://github.com/UofUEpiBio/measles) R package (version 0.4.1 or later, built on [`epiworldR`](https://github.com/UofUEpiBio/epiworldR) 0.19.0 or later, with `clone_epi()`, both installed from [r-universe](https://uofuepibio.r-universe.dev) in the dev container, see [`.devcontainer/Containerfile`](./.devcontainer/Containerfile)), [`multigroup.vaccine`](https://github.com/EpiForeSITE/multigroup-vaccine) (pinned to commit `ddd9201`) and [`socialmixr`](https://cran.r-project.org/package=socialmixr) (pinned to 0.7.0) for the population, contact, and vaccination data, [Quarto](https://quarto.org) for rendering reports, `ggplot2` for visualization, and `data.table` for data wrangling.
+This repository contains the R code needed to reproduce the analyses in paper *"Hidden Burden of a Measles Outbreak Revealed by Genomic and Transmission Models"*. Dependencies include the [`measles`](https://github.com/UofUEpiBio/measles) R package (0.4.1 at commit [`d1e87fe`](https://github.com/UofUEpiBio/measles/commit/d1e87fed204ebe820620759fa1b85cdb9d2e0b03), built on [`epiworldR`](https://github.com/UofUEpiBio/epiworldR) 0.19.0 at commit [`ce1cb0f`](https://github.com/UofUEpiBio/epiworldR/commit/ce1cb0f088b9a3a19674fb6598b2c42780c72b12); both pinned in the dev container, see [`.devcontainer/Containerfile`](./.devcontainer/Containerfile)), [`multigroup.vaccine`](https://github.com/EpiForeSITE/multigroup-vaccine) (pinned to commit `ddd9201`) and [`socialmixr`](https://cran.r-project.org/package=socialmixr) (pinned to 0.7.0) for the population, contact, and vaccination data, [Quarto](https://quarto.org) for rendering reports, `ggplot2` for visualization, and `data.table` for data wrangling.
+
+## Repository layout
+
+| Path | Contents |
+|---|---|
+| [`template.qmd`](./template.qmd), [`Makefile`](./Makefile) | The agent-based model (one report per scenario) and the targets that run it |
+| [`data/`](./data) | Population, contact matrices, and vaccination data for the model |
+| [`scenarios/`](./scenarios) | Main model runs (R0 from 5 to 17) |
+| [`population_immunity/`](./population_immunity), [`sensitivity_epistorm/`](./sensitivity_epistorm), [`sensitivity_rash_redux/`](./sensitivity_rash_redux) | Sensitivity analyses |
+| [`Figure_Data/`](./Figure_Data) | Figure scripts, their inputs, and Figure 4 |
+| [`BedfordMethodCount.R`](./BedfordMethodCount.R), [`plotEBSP.R`](./plotEBSP.R) | Genomic burden estimate from the EBSP logs |
+| [`tests/tinytest/`](./tests/tinytest) | Checks of the data and the Figure 4 inputs |
+
+Each model folder has a `README.md` with one table and one figure summarizing its runs, plus a Markdown report and an `.rds` output per scenario.
+
+## Reproducing the paper
+
+| Output | Command | Result |
+|---|---|---|
+| Model data | `make data` | `data/*.csv` |
+| Main model runs | `make scenarios` | `scenarios/` |
+| Sensitivity analyses | `make population_immunity`, `make sensitivity_epistorm`, `make sensitivity_rash_redux` | One folder each |
+| Figure 4 | `make figures` | `Figure_Data/Figure4.{png,pdf}` |
+| Figures 1-3, SI5, SI6 | See [`Figure_Data/README.md`](./Figure_Data/README.md) | |
 
 ## Container
 
@@ -18,7 +42,7 @@ The population, contact matrices, and vaccination data for the Utah-Arizona bord
 make data   # runs data/utaz_data.R and data/epistorm_matrix.R
 ```
 
-[`data/utaz_data.R`](./data/utaz_data.R) follows the [`multigroup.vaccine` vignette](https://github.com/EpiForeSITE/multigroup-vaccine/blob/ddd9201f28b9908c033542f6a2445b84619af1c7/vignettes/experiments/utaz_age_school.Rmd) and writes `data/utaz_population.rds`, `data/utaz_contacts_polymod.rds`, and one `data/utaz_vaccination_adults_<assumption>.rds` file per adult vaccination assumption: `baseline`, `78pct`, `86pct`, and `93pct` (the "Alternate adult immunization assumptions" of the vignette). To add an assumption, call `save_vaccination(<coverage>)` at the end of the script (for example, `save_vaccination(0.9)` writes `utaz_vaccination_adults_90pct.rds`). The `baseline` data matches `measles::short_creek` (measles 0.4.1) except for the school sizes: rounding the rescaled schools can leave an age group a person off its census count, and here the largest school takes the difference (one person fewer in the largest school of ages 5-11 and of ages 12-13). The deterministic final sizes at R0 = 9 change by at most one infection. The POLYMOD matrix differs from `measles::short_creek_matrix` by up to 1.6% per cell (0.6% on average), since the latter was built with an earlier development version of `multigroup.vaccine`; after calibration, the deterministic final size changes by less than 0.1%.
+[`data/utaz_data.R`](./data/utaz_data.R) follows the [`multigroup.vaccine` vignette](https://github.com/EpiForeSITE/multigroup-vaccine/blob/ddd9201f28b9908c033542f6a2445b84619af1c7/vignettes/experiments/utaz_age_school.Rmd) and writes `data/utaz_population_ages.csv`, `data/utaz_population_schools.csv`, `data/utaz_contacts_polymod.csv`, and one `data/utaz_vaccination_adults_<assumption>.csv` file per adult vaccination assumption: `baseline`, `78pct`, `86pct`, and `93pct` (the "Alternate adult immunization assumptions" of the vignette). The files are plain CSV, written with `data.table::fwrite()` and read with `fread()`; the contact matrices have the group names in their first column (`group`). To add an assumption, call `save_vaccination(<coverage>)` at the end of the script (for example, `save_vaccination(0.9)` writes `utaz_vaccination_adults_90pct.csv`). The `baseline` data matches `measles::short_creek` (measles 0.4.1) except for the school sizes: rounding the rescaled schools can leave an age group a person off its census count, and here the largest school takes the difference (one person fewer in the largest school of ages 5-11 and of ages 12-13). The deterministic final sizes at R0 = 9 change by at most one infection. The POLYMOD matrix differs from `measles::short_creek_matrix` by up to 1.6% per cell (0.6% on average), since the latter was built with an earlier development version of `multigroup.vaccine`; after calibration, the deterministic final size changes by less than 0.1%.
 
 ### Tests
 
@@ -42,6 +66,7 @@ The main scenarios (POLYMOD contacts) and the sensitivity analyses are run with:
 
 ```bash
 make scenarios               # R0 = 5, 7, ..., 17; results in scenarios/
+make population_immunity     # R0 = 9, four adult-vaccination assumptions
 make sensitivity_epistorm    # same, with the Epistorm-Mix contact matrix
 make sensitivity_rash_redux  # R0 = 9, grid of rash contact reduction x contact-tracing success
 ```
@@ -77,17 +102,21 @@ Each scenario output holds a run with quarantine and one without. "Self-isolatio
 
 This section lists every parameter used in the analyses. It follows the canonical, cited table in the `measles` R package: [`measles_parameters.csv`](https://github.com/UofUEpiBio/measles/blob/main/inst/extdata/measles_parameters.csv) (see also the [parameters vignette](https://github.com/UofUEpiBio/measles/blob/main/vignettes/parameters.qmd)). See [EpiForeSITE/measles#5](https://github.com/EpiForeSITE/measles/issues/5) for background.
 
-The analyses are set up to be run with `measles` 0.4.1 or later; `template.qmd` stops if an older version is installed, and each report ends with the session information.
+The analyses use `measles` 0.4.1 at commit `d1e87fe` and `epiworldR` 0.19.0 at commit `ce1cb0f`, the builds behind the outputs in `scenarios/` (Figure 4). In these builds, the incubation, prodromal, and rash stages are geometric (each day, an agent leaves the stage with probability one over its mean). Later development builds of `measles` 0.4.1, from [UofUEpiBio/measles#69](https://github.com/UofUEpiBio/measles/pull/69) on, draw lognormal stage durations and change the results under the same version number; `template.qmd` stops if one of them, or a version older than 0.4.1, is installed, and each report ends with the session information.
 
 ### Scenarios ([`Makefile`](./Makefile))
 
-| Set | Contact matrix | R0 | Rash contact reduction / contact-tracing success | Isolation willingness | Quarantine willingness |
-|---|---|---|---|---|---|
-| `make scenarios` (main) | POLYMOD | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 |
-| `make sensitivity_epistorm` | Epistorm-Mix | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 |
-| `make sensitivity_rash_redux` | POLYMOD | 9 | 0, 0.25, 0.5, 0.75, 1 × 0, 0.25, 0.5, 0.75, 1 | 0.0 | 0.9 |
+| Set | Contact matrix | R0 | Rash contact reduction / contact-tracing success | Isolation willingness | Quarantine willingness | Summary |
+|---|---|---|---|---|---|---|
+| `make scenarios` (main) | POLYMOD | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 | [`scenarios/README.md`](./scenarios/README.md) |
+| `make population_immunity` | POLYMOD | 9 | Same three focal scenarios, each with `baseline`, `78pct`, `86pct`, and `93pct` adult vaccination | 0.0 | 0.9 | [`population_immunity/README.md`](./population_immunity/README.md) |
+| `make sensitivity_epistorm` | Epistorm-Mix | 5, 7, 9, 11, 13, 15, 17 | 0.00 / 0.00; 0.50 / 0.00; 0.75 / 0.25 | 0.0 | 0.9 | [`sensitivity_epistorm/README.md`](./sensitivity_epistorm/README.md) |
+| `make sensitivity_rash_redux` | POLYMOD | 9 | 0, 0.25, 0.5, 0.75, 1 × 0, 0.25, 0.5, 0.75, 1 | 0.0 | 0.9 | [`sensitivity_rash_redux/README.md`](./sensitivity_rash_redux/README.md) |
 
 Each report runs two scenarios: with quarantine (21 days) and without quarantine (`Quarantine period` set to −1).
+The `population_immunity/` outputs also hold the infections by age group in each run (`infections_by_age`, `infections_by_age_no_quarantine`). They were run in the dev container (Linux), while `scenarios/` was run on macOS; with the same builds and seed, the two platforms draw different random numbers, so the `baseline` arms match Figure 4 only within run-to-run noise (medians within 3 infections) rather than exactly.
+
+Each set has a summary (Summary column) with one table and one figure, rendered from the `README.qmd` in its directory by its `make` target after the runs; the figures are in `README_files/figure-commonmark/` as PNG and PDF.
 
 ### Transmission model (`ModelMeaslesMixing()`, [`template.qmd`](./template.qmd))
 
@@ -97,10 +126,10 @@ Each report runs two scenarios: with quarantine (21 days) and without quarantine
 | Transmission rate (`transmission_rate`) | 0.2 | Assumption. Fixed; the contact matrix is scaled instead (`contact_matrix * scaling_factor`). |
 | Infectious period used in calibration | 4 + 1/(h + 1/4) ≈ 7.6 days | Prodromal period plus the expected time in rash (exit by recovery at rate 1/4 or hospitalization at rate h). By construction, the calibration targets R0 without behavior change, so `rash_reduction_contact_rate` is not included. |
 | Calibration method | Next-generation matrix | Diekmann et al. 2010, *J R Soc Interface* 7(47):873–885, [doi:10.1098/rsif.2009.0386](https://doi.org/10.1098/rsif.2009.0386), via `measles::calibrate_mixing_model()`. R0 is computed for a fully susceptible population. |
-| Contact matrix (`contact_matrix`), main analysis | `data/utaz_contacts_polymod.rds` × scaling factor (15 groups: 2 pre-school age groups, 9 schools, 4 adult age groups) | POLYMOD (Mossong et al. 2008, *PLoS Med* 5(3):e74, [doi:10.1371/journal.pmed.0050074](https://doi.org/10.1371/journal.pmed.0050074)), retrieved with `multigroup.vaccine::contactMatrixAgeSchool(schportion = 0.7)` in [`data/utaz_data.R`](./data/utaz_data.R). The 70% share of school-age children's within-age-band contacts made at their own school is an assumption. |
+| Contact matrix (`contact_matrix`), main analysis | `data/utaz_contacts_polymod.csv` × scaling factor (15 groups: 2 pre-school age groups, 9 schools, 4 adult age groups) | POLYMOD (Mossong et al. 2008, *PLoS Med* 5(3):e74, [doi:10.1371/journal.pmed.0050074](https://doi.org/10.1371/journal.pmed.0050074)), retrieved with `multigroup.vaccine::contactMatrixAgeSchool(schportion = 0.7)` in [`data/utaz_data.R`](./data/utaz_data.R). The 70% share of school-age children's within-age-band contacts made at their own school is an assumption. |
 | Contact matrix, Epistorm sensitivity analysis (`EPISTORM=TRUE`) | Epistorm-Mix US total contacts mapped to the 15 groups × scaling factor | Litvinova et al. 2025, *medRxiv*, [doi:10.1101/2025.11.20.25340662](https://doi.org/10.1101/2025.11.20.25340662). Downloaded from [epistorm/Epistorm-Mix](https://github.com/epistorm/Epistorm-Mix) (commit `05966ba`) and built by [`data/epistorm_matrix.R`](./data/epistorm_matrix.R) with the same method as the POLYMOD matrix (see [`data/README.md`](./data/README.md)). |
 | Population size (`n`) | 5,915 (sum of `agepops`) | U.S. Census Bureau ACS table S0101 (2024; Hildale city UT, Colorado City town AZ, Centennial Park CDP AZ), retrieved from the `multigroup.vaccine` package (`getCityData()`). |
-| Population groups (entities) | 15 groups from `data/utaz_vaccination_adults_<assumption>.rds`; school enrollments 250, 350, 190, 86, 150, 84, 114, 108, 205, rescaled to the census age counts (296, 414, 225, 94, 164, 92, 166, 158, 299) | Public school records, retrieved from the `multigroup.vaccine` package. Added with `add_entities_from_dataframe()`. |
+| Population groups (entities) | 15 groups from `data/utaz_vaccination_adults_<assumption>.csv`; school enrollments 250, 350, 190, 86, 150, 84, 114, 108, 205, rescaled to the census age counts (296, 414, 225, 94, 164, 92, 166, 158, 299) | Public school records, retrieved from the `multigroup.vaccine` package. Added with `add_entities_from_dataframe()`. |
 | Vaccination (`prop_vaccinated`) | 0 in the constructor, then the per-group coverage `vacc_rate` (overall 51.9% at `baseline`; 57.4%, 61.7%, and 65.5% with 78%, 86%, and 93% of adults vaccinated) | School MMR records (school-age groups), retrieved from the `multigroup.vaccine` package; assumptions for the other groups (under 1: 0; ages 1–4 and 18–24: the elementary and high-school coverage; 25–44: mean of the 18–24 coverage and 95%; 45–69: 95%; 70+: 100%). The `VAX_ADULTS` alternatives set all adults aged 18–69 to 78%, 86%, or 93% (based on Washington County UT; Mohave County AZ, Utah, and Arizona; and both counties 10 years ago, per `multigroup.vaccine`). Distributed with `distribute_tool_to_entities()`. |
 | Initial cases (`prevalence`) | `1 / N` (one index case) | Scenario input. |
 | Vaccine efficacy (`vax_efficacy`) | 0.97; 0.93 for ages 1–4; 1 for ages 70+ | [Utah DHHS Measles Disease Plan](https://epi.utah.gov/wp-content/uploads/Measles-disease-plan.pdf) ("~97%"); CDC. Group values as in the `multigroup.vaccine` analysis; ages 1–4 and 70+ get copies of the model's all-or-nothing MMR vaccine made with `clone_epi()`. |
@@ -129,7 +158,7 @@ The Utah DHHS Measles Disease Plan cited above is the edition last updated March
 
 ### Genomic burden estimate ([`BedfordMethodCount.R`](./BedfordMethodCount.R), [`plotEBSP.R`](./plotEBSP.R))
 
-[`BedfordMethodCount.R`](https://github.com/EpiForeSITE/measles-hidden-burden/blob/main/BedfordMethodCount.R) is on `main` (added after this branch was created). These values convert the effective population size from the extended Bayesian skyline (EBSP) into case counts. They are not `measles` package parameters, so there is no package default.
+These values convert the effective population size from the extended Bayesian skyline (EBSP) into case counts. They are not `measles` package parameters, so there is no package default.
 
 | Parameter | Value used | Source |
 |---|---|---|

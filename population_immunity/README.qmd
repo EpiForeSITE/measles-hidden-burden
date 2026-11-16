@@ -1,0 +1,148 @@
+---
+title: "Sensitivity analysis: adult vaccination (R0 = 9)"
+format: gfm
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    dev: [png, pdf]
+    dpi: 300
+---
+
+```{r}
+#| label: setup
+library(data.table)
+library(ggplot2)
+library(knitr)
+source(file.path("..", "Figure_Data", "FigureABM.R"))
+
+ASSUMPTIONS <- c(
+  baseline = "Baseline",
+  "78pct"  = "78%",
+  "86pct"  = "86%",
+  "93pct"  = "93%"
+)
+ADULTS <- c("18to24", "25to44", "45to69", "70+")
+GROUPS <- c("Total", "Children", "Adults")
+
+fmt <- function(x) formatC(round(x), format = "d", big.mark = ",")
+```
+
+```{r}
+#| label: data
+# Final infections per run, by age, of the three Figure 4 arms
+runs <- rbindlist(lapply(names(ASSUMPTIONS), function(v) {
+  rbindlist(lapply(seq_len(nrow(FOCAL_SCENARIOS)), function(i) {
+    s <- FOCAL_SCENARIOS[i]
+    f <- scenario_file(".", 9, s$rash, s$ct, vax_adults = v)
+    x <- as.data.table(
+      readRDS(f)[[sub("outbreak_size", "infections_by_age", s$arm)]]
+    )
+    x[,
+      .(
+        Children = as.numeric(sum(infections[!age_group %in% ADULTS])),
+        Adults   = as.numeric(sum(infections[age_group %in% ADULTS]))
+      ),
+      by = sim_num
+    ][, `:=`(Total = Children + Adults, model = s$label, vax_adults = v)]
+  }))
+}))
+
+retained <- runs[Total >= MIN_OUTBREAK_SIZE]
+
+sizes <- melt(
+  retained,
+  id.vars       = c("vax_adults", "model"),
+  measure.vars  = GROUPS,
+  variable.name = "group"
+)[,
+  .(
+    median = median(value),
+    q25    = quantile(value, 0.25, names = FALSE),
+    q75    = quantile(value, 0.75, names = FALSE)
+  ),
+  by = .(vax_adults, model, group)
+]
+
+sizes[, vax_adults := factor(vax_adults, names(ASSUMPTIONS), ASSUMPTIONS)]
+sizes[, model := factor(model, FOCAL_SCENARIOS$label)]
+sizes[, group := factor(group, GROUPS)]
+```
+
+The three focal scenarios of Figure 4 at R0 = 9 (`make population_immunity`), for each assumption on the vaccination coverage of adults aged 18 to 69: the current one (`baseline`) and the alternate adult immunization assumptions of the [`multigroup.vaccine` vignette](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/utaz_age_school.html), with 78%, 86%, and 93% coverage. Each scenario has 1,000 runs; runs with fewer than `r MIN_OUTBREAK_SIZE` cases are excluded as early extinctions. As in Figure 4, self-isolation with quarantine uses the run with quarantine and the other two scenarios the run without. Children are those under 18.
+
+```{r}
+#| label: tbl-population-immunity
+cells <- dcast(
+  sizes[, .(
+    vax_adults, model, group,
+    value = sprintf("%s (%s-%s)", fmt(median), fmt(q25), fmt(q75))
+  )],
+  vax_adults + model ~ group,
+  value.var = "value"
+)
+ratio <- dcast(sizes, vax_adults + model ~ group, value.var = "median")[,
+  .(vax_adults, model, ratio = sprintf("%.1f", Children / Adults))
+]
+n_retained <- retained[, .(retained = fmt(.N)), by = .(vax_adults, model)]
+n_retained[, `:=`(
+  vax_adults = factor(vax_adults, names(ASSUMPTIONS), ASSUMPTIONS),
+  model      = factor(model, levels(sizes$model))
+)]
+
+tab <- n_retained[
+  cells[ratio, on = .(vax_adults, model)],
+  on = .(vax_adults, model)
+]
+setorder(tab, vax_adults, model)
+
+kable(
+  tab[, .(
+    vax_adults, model,
+    retained,
+    Total, Children, Adults, ratio
+  )],
+  col.names = c(
+    "Adult vaccination", "Scenario", "Retained runs",
+    "Total infections", "Children", "Adults", "Child:adult ratio"
+  ),
+  align     = "llrrrrr",
+  caption   = paste(
+    "Final outbreak size at day 365, median (interquartile range) across",
+    "the retained runs; the ratio is of the medians."
+  )
+)
+```
+
+```{r}
+#| label: fig-population-immunity
+#| fig-width: 9
+#| fig-height: 4
+#| fig-cap: "Final outbreak size at day 365 by adult vaccination assumption: medians and interquartile ranges across the retained runs."
+dodge <- position_dodge(width = 0.3)
+
+ggplot(sizes, aes(vax_adults, median, color = model, group = model)) +
+  geom_line(linewidth = 0.5, position = dodge) +
+  geom_pointrange(
+    aes(ymin = q25, ymax = q75),
+    size      = 0.35,
+    linewidth = 0.8,
+    position  = dodge
+  ) +
+  facet_wrap(
+    ~group,
+    nrow     = 1,
+    labeller = as_labeller(c(
+      Total    = "Total",
+      Children = "Children (under 18)",
+      Adults   = "Adults (18+)"
+    ))
+  ) +
+  scale_color_manual(values = SCENARIO_COLORS) +
+  scale_y_continuous(labels = fmt, limits = c(0, NA)) +
+  labs(x = "Adult vaccination coverage (ages 18-69)", y = "Infections") +
+  theme_figure4() +
+  theme(strip.text = element_text(face = "bold", color = INK_PRIMARY))
+```

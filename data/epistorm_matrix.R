@@ -229,7 +229,10 @@ dimnames(utaz_epistorm) <- list(dn, dn)
 # (created by utaz_data.R)
 # ==============================================================================
 
-pop <- readRDS(file.path("data", "utaz_population.rds"))
+pop <- c(
+  fread(file.path("data", "utaz_population_ages.csv")),
+  fread(file.path("data", "utaz_population_schools.csv"))
+)
 agepops         <- pop$agepops
 schoolpops      <- pop$schoolpops
 schoolagegroups <- pop$schoolagegroups
@@ -269,24 +272,29 @@ print(round(diag(utaz_epistorm / rowSums(utaz_epistorm)), 3))
 message("Diagonal share of contacts — school-resolved groups:")
 print(round(diag(cm / rowSums(cm)), 3))
 
-saveRDS(
-  cm,
-  file = file.path("data", "utaz_contacts_epistorm.rds")
-  )
+# 17 significant digits, so that fread() reads back the same numbers (with
+# fwrite()'s 15, the model runs differ)
+fwrite(
+  data.table(group = rownames(cm), apply(cm, 2, sprintf, fmt = "%.17g")),
+  file.path("data", "utaz_contacts_epistorm.csv")
+)
 
 # ==============================================================================
 # Final validation against the POLYMOD matrix (created by utaz_data.R)
 # ==============================================================================
 
-ref_matrix <- readRDS(file.path("data", "utaz_contacts_polymod.rds"))
+ref_matrix <- as.matrix(
+  fread(file.path("data", "utaz_contacts_polymod.csv")),
+  rownames = "group"
+)
 
 # Same groups and the same population
 stopifnot(
   "dimnames(cm) do not match the POLYMOD matrix" =
     identical(unname(dimnames(cm)), unname(dimnames(ref_matrix))),
   "group sizes do not match the vaccination data" =
-    all(grouppops == readRDS(
-      file.path("data", "utaz_vaccination_adults_baseline.rds")
+    all(grouppops == fread(
+      file.path("data", "utaz_vaccination_adults_baseline.csv")
     )$agepops)
 )
 

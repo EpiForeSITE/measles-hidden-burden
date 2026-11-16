@@ -1,16 +1,19 @@
+# R and editors
+.Rhistory
+.RData
 .vscode
-*.rda
+.DS_Store
+Rplots.pdf
+
+# Simulation outputs (*.rds) are large; the ones we keep are force-added
+# with `git add -f`
 *.rds
-*.Rhistory
-*.RData
-sensitivity_*/
+*.rda
 
-# We are explicitly excluding these, since top
-# level files are not intended to be included
-# in the repository.
-*.qmd
-*.R
+# Figures of the individual reports; each analysis folder has a summary
+# (README.md and README_files/) instead
+r0_*_files/
 
-# Tests and figure scripts
-!tests/tinytest/*.R
-!Figure_Data/*.R
+# Local notes and manuscript files
+*.odt
+supplement/

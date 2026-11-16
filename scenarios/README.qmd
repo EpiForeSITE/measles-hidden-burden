@@ -1,0 +1,116 @@
+---
+title: "Main scenarios: R0 from 5 to 17"
+format: gfm
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    dev: [png, pdf]
+    dpi: 300
+---
+
+```{r}
+#| label: setup
+library(data.table)
+library(ggplot2)
+library(knitr)
+source(file.path("..", "Figure_Data", "FigureABM.R"))
+
+R0_VALUES <- c(5, 7, 9, 11, 13, 15, 17)
+MEASURES  <- c(
+  size  = "Final outbreak size (infections)",
+  share = "Runs with 10 or more cases (%)"
+)
+
+fmt <- function(x) formatC(round(x), format = "d", big.mark = ",")
+```
+
+```{r}
+#| label: data
+sizes <- rbindlist(lapply(R0_VALUES, function(r0) {
+  s <- abm_summaries(".", r0)
+  s$final[,
+    .(
+      median = median(outbreak_size),
+      q25    = quantile(outbreak_size, 0.25, names = FALSE),
+      q75    = quantile(outbreak_size, 0.75, names = FALSE)
+    ),
+    by = scenario
+  ][s$runs, on = "scenario"][, r0 := r0]
+}))
+```
+
+The three focal scenarios of the main analysis (`make scenarios`) for R0 = 5, 7, ..., 17, with the POLYMOD contact matrix, no isolation willingness, and 90% quarantine willingness:
+
+- No interventions: no rash contact reduction and no contact tracing.
+- Self-isolation only: 50% rash contact reduction, no contact tracing.
+- Self-isolation with quarantine: 75% rash contact reduction and 25% contact-tracing success, with a 21-day quarantine.
+
+As in Figure 4 (R0 = 9), self-isolation with quarantine uses the run with quarantine and the other two scenarios the run without. Each scenario has 1,000 runs; runs with fewer than `r MIN_OUTBREAK_SIZE` cases are early extinctions, and the final outbreak sizes are over the remaining (retained) runs.
+
+```{r}
+#| label: tbl-scenarios
+tab <- sizes[order(r0, scenario), .(
+  r0, scenario,
+  retained = sprintf("%s (%.1f%%)", fmt(retained), 100 * retained / runs),
+  size     = sprintf("%s (%s-%s)", fmt(median), fmt(q25), fmt(q75))
+)]
+
+kable(
+  tab,
+  col.names = c("R0", "Scenario", "Retained runs (%)", "Infections"),
+  align     = "rlrr",
+  caption   = paste(
+    "Runs with 10 or more cases out of 1,000, and final outbreak size at",
+    "day 365, median (interquartile range) across those runs."
+  )
+)
+```
+
+```{r}
+#| label: fig-scenarios
+#| fig-width: 9
+#| fig-height: 4
+#| fig-cap: "Final outbreak size at day 365 (median and interquartile range across the retained runs) and share of runs with 10 or more cases, by R0. The dashed line marks R0 = 9, the runs of Figure 4."
+fig_data <- rbind(
+  sizes[, .(
+    r0, scenario,
+    measure = MEASURES[["size"]],
+    value   = median,
+    q25,
+    q75
+  )],
+  sizes[, .(
+    r0, scenario,
+    measure = MEASURES[["share"]],
+    value   = 100 * retained / runs,
+    q25     = NA_real_,
+    q75     = NA_real_
+  )]
+)
+fig_data[, measure := factor(measure, MEASURES)]
+
+ggplot(fig_data, aes(r0, value, color = scenario)) +
+  geom_vline(
+    xintercept = 9,
+    color      = INK_SECONDARY,
+    linetype   = "dashed",
+    linewidth  = 0.3
+  ) +
+  geom_line(linewidth = 0.5) +
+  geom_pointrange(
+    aes(ymin = q25, ymax = q75),
+    size      = 0.35,
+    linewidth = 0.8,
+    na.rm     = TRUE
+  ) +
+  facet_wrap(~measure, nrow = 1, scales = "free_y") +
+  scale_color_manual(values = SCENARIO_COLORS) +
+  scale_x_continuous(breaks = R0_VALUES) +
+  scale_y_continuous(labels = fmt, limits = c(0, NA)) +
+  labs(x = "R0", y = NULL) +
+  theme_figure4() +
+  theme(strip.text = element_text(face = "bold", color = INK_PRIMARY))
+```
