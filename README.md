@@ -90,7 +90,7 @@ The analyses use `measles` 0.4.1 at commit `d1e87fe` and `epiworldR` 0.19.0 at c
 | `make sensitivity_rash_redux` | POLYMOD | 9 | 0, 0.25, 0.5, 0.75, 1 × 0, 0.25, 0.5, 0.75, 1 | 0.0 | 0.9 | [`sensitivity_rash_redux/README.md`](./sensitivity_rash_redux/README.md) |
 
 Each report runs two scenarios: with quarantine (21 days) and without quarantine (`Quarantine period` set to −1).
-The `population_immunity/` outputs also hold the infections by age group in each run (`infections_by_age`, `infections_by_age_no_quarantine`).
+The `population_immunity/` outputs also hold the infections by age group in each run (`infections_by_age`, `infections_by_age_no_quarantine`). They were run in the dev container (Linux), while `scenarios/` was run on macOS; with the same builds and seed, the two platforms draw different random numbers, so the `baseline` arms match Figure 4 only within run-to-run noise (medians within 3 infections) rather than exactly.
 
 Each set has a summary (Summary column) with one table and one figure, rendered from the `README.qmd` in its directory by its `make` target after the runs; the figures are in `README_files/figure-commonmark/` as PNG and PDF.
 
