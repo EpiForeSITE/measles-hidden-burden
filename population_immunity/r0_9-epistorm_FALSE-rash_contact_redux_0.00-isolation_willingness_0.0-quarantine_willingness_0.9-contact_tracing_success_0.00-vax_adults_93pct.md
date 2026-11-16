@@ -1,5 +1,5 @@
 George G. Vega Yon, Ph.D.
-2026-11-06
+2026-11-16
 
 # Scenario of Utah-Arizona Border Measles Outbreak (R0 = 9)
 
@@ -59,8 +59,8 @@ on assumptions and do not reflect the actual vaccination information for
 those age groups. The adult vaccination assumption is selected with the
 `vax_adults` parameter: `baseline` or the coverage of adults aged 18 to
 69 (for example, `78pct`); each assumption is a file
-`data/utaz_vaccination_adults_<assumption>.rds`. We can load the needed
-data using the `readRDS()` function:
+`data/utaz_vaccination_adults_<assumption>.csv`. We can load the needed
+data with the functions in [`data/io.R`](data/io.R):
 
 ``` r
 # The results require measles >= 0.4.1 and epiworldR >= 0.19.0 (with
@@ -73,8 +73,9 @@ stopifnot(
   "measles build newer than the pinned one (see the README)" =
     !"incubation_period_sd" %in% names(formals(ModelMeaslesMixing))
 )
+source("data/io.R")
 vax_file <- sprintf(
-  "data/utaz_vaccination_adults_%s.rds",
+  "data/utaz_vaccination_adults_%s.csv",
   params$vax_adults
 )
 if (!file.exists(vax_file)) {
@@ -83,15 +84,15 @@ if (!file.exists(vax_file)) {
     "'. Add it with save_vaccination() in data/utaz_data.R."
   )
 }
-utaz <- readRDS(vax_file)
-utaz_matrix <- readRDS("data/utaz_contacts_polymod.rds")
+utaz <- read_vaccination(vax_file)
+utaz_matrix <- read_contacts("data/utaz_contacts_polymod.csv")
 ```
 
 If we are using the Epistorm data, we need to adjust it
 
 ``` r
 if (params$epistorm) {
-  utaz_matrix <- readRDS("data/utaz_contacts_epistorm.rds")
+  utaz_matrix <- read_contacts("data/utaz_contacts_epistorm.csv")
 }
 ```
 
@@ -381,9 +382,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 11.00s (1000 runs)
-    Last run speed      : 37.77 million agents x day / second
-    Average run speed   : 184.22 million agents x day / second
+    Total elapsed t     : 12.00s (1000 runs)
+    Last run speed      : 28.20 million agents x day / second
+    Average run speed   : 167.30 million agents x day / second
     Rewiring            : off
     Last seed used      : 321912252
 
@@ -697,9 +698,9 @@ summary(measles_model)
     Days (duration)     : 365 (of 365)
     Number of viruses   : 1
     Last run elapsed t  : 0.00s
-    Total elapsed t     : 23.00s (2000 runs)
-    Last run speed      : 27.53 million agents x day / second
-    Average run speed   : 183.45 million agents x day / second
+    Total elapsed t     : 25.00s (2000 runs)
+    Last run speed      : 22.58 million agents x day / second
+    Average run speed   : 167.27 million agents x day / second
     Rewiring            : off
     Last seed used      : 321912252
 

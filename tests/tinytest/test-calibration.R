@@ -5,13 +5,16 @@ library(measles)
 library(multigroup.vaccine)
 
 data_dir <- file.path("..", "..", "data")
+source(file.path(data_dir, "io.R"))
 
-vax <- readRDS(file.path(data_dir, "utaz_vaccination_adults_baseline.rds"))
+vax <- read_vaccination(
+  file.path(data_dir, "utaz_vaccination_adults_baseline.csv")
+)
 grouppops <- vax$agepops
 
 matrices <- list(
-  polymod  = readRDS(file.path(data_dir, "utaz_contacts_polymod.rds")),
-  epistorm = readRDS(file.path(data_dir, "utaz_contacts_epistorm.rds"))
+  polymod  = read_contacts(file.path(data_dir, "utaz_contacts_polymod.csv")),
+  epistorm = read_contacts(file.path(data_dir, "utaz_contacts_epistorm.csv"))
 )
 
 # ==============================================================================
@@ -61,8 +64,8 @@ expected <- c(baseline = 2788, "78pct" = 2396, "86pct" = 2158, "93pct" = 1969)
 efficacy <- c(0.93, 0.93, rep(0.97, 12), 1)
 
 for (a in names(expected)) {
-  v <- readRDS(
-    file.path(data_dir, sprintf("utaz_vaccination_adults_%s.rds", a))
+  v <- read_vaccination(
+    file.path(data_dir, sprintf("utaz_vaccination_adults_%s.csv", a))
   )
 
   fs <- finalsize(

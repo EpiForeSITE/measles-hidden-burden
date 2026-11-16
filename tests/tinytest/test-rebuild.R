@@ -10,7 +10,7 @@ dir.create(file.path(build_dir, "data"), recursive = TRUE)
 file.copy(
   file.path(
     data_dir,
-    c("utaz_data.R", "epistorm_matrix.R", "Total-M-by5_80-matrix.csv")
+    c("io.R", "utaz_data.R", "epistorm_matrix.R", "Total-M-by5_80-matrix.csv")
   ),
   file.path(build_dir, "data")
 )
@@ -31,15 +31,15 @@ setwd(old_wd)
 
 expect_equal(unname(status), c(0L, 0L), info = "data scripts run")
 
-committed <- list.files(data_dir, pattern = "^utaz_.*[.]rds$")
-built     <- list.files(file.path(build_dir, "data"), pattern = "^utaz_.*[.]rds$")
+committed <- list.files(data_dir, pattern = "^utaz_.*[.]csv$")
+built     <- list.files(file.path(build_dir, "data"), pattern = "^utaz_.*[.]csv$")
 
 expect_equal(sort(built), sort(committed))
 
 for (f in committed) {
   expect_equal(
-    readRDS(file.path(build_dir, "data", f)),
-    readRDS(file.path(data_dir, f)),
+    read.csv(file.path(build_dir, "data", f), check.names = FALSE),
+    read.csv(file.path(data_dir, f), check.names = FALSE),
     tolerance = 1e-10,
     info      = f
   )

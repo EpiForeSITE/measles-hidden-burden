@@ -7,13 +7,17 @@
 #
 # Run from the repository root (`make data`). Writes to data/:
 #
-# - utaz_population.rds: age and school populations (used by epistorm_matrix.R).
-# - utaz_contacts_polymod.rds: the 15 x 15 POLYMOD contact matrix.
-# - utaz_vaccination_adults_<assumption>.rds: one data.frame per adult
-#   vaccination assumption (see `vaccination_data()`), selected in template.qmd
-#   with the `vax_adults` parameter.
+# - utaz_population_ages.csv and utaz_population_schools.csv: age and school
+#   populations (used by epistorm_matrix.R).
+# - utaz_contacts_polymod.csv: the 15 x 15 POLYMOD contact matrix.
+# - utaz_vaccination_adults_<assumption>.csv: one table per adult vaccination
+#   assumption (see `vaccination_data()`), selected in template.qmd with the
+#   `vax_adults` parameter.
+#
+# The files are read with the functions in data/io.R.
 
 library(multigroup.vaccine)
+source(file.path("data", "io.R"))
 
 # ==============================================================================
 # Population by age (ACS 2024, table S0101)
@@ -59,14 +63,13 @@ for (a in unique(schoolagegroups)) {
   schoolpops[inds] <- schoolpopsnew
 }
 
-saveRDS(
-  list(
-    agelims         = agelims,
-    agepops         = agepops,
-    schoolagegroups = schoolagegroups,
-    schoolpops      = schoolpops
-  ),
-  file = file.path("data", "utaz_population.rds")
+write_data(
+  data.frame(agelims = agelims, agepops = agepops),
+  file.path("data", "utaz_population_ages.csv")
+)
+write_data(
+  data.frame(schoolagegroups = schoolagegroups, schoolpops = schoolpops),
+  file.path("data", "utaz_population_schools.csv")
 )
 
 # ==============================================================================
@@ -89,7 +92,7 @@ grouppops <- c(
 
 stopifnot(max(abs(cm * grouppops - t(cm * grouppops))) < 1e-10)
 
-saveRDS(cm, file = file.path("data", "utaz_contacts_polymod.rds"))
+write_data(cm, file.path("data", "utaz_contacts_polymod.csv"))
 
 # ==============================================================================
 # Vaccination
@@ -144,19 +147,16 @@ vaccination_data <- function(adults = NULL) {
 
 #' Saves the vaccination data for an assumption
 #'
-#' The file is data/utaz_vaccination_adults_<assumption>.rds, where the
+#' The file is data/utaz_vaccination_adults_<assumption>.csv, where the
 #' assumption is "baseline" or the adult coverage in percent (e.g., "78pct").
 save_vaccination <- function(adults = NULL) {
 
   assumption <- if (is.null(adults)) "baseline" else
     sprintf("%gpct", adults * 100)
 
-  saveRDS(
+  write_data(
     vaccination_data(adults),
-    file = file.path(
-      "data",
-      sprintf("utaz_vaccination_adults_%s.rds", assumption)
-    )
+    file.path("data", sprintf("utaz_vaccination_adults_%s.csv", assumption))
   )
 
 }

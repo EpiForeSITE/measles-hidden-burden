@@ -2,18 +2,21 @@
 # data/utaz_data.R and data/epistorm_matrix.R)
 
 data_dir <- file.path("..", "..", "data")
+source(file.path(data_dir, "io.R"))
 
-pop <- readRDS(file.path(data_dir, "utaz_population.rds"))
+pop <- read_population(data_dir)
 
 assumptions <- c("baseline", "78pct", "86pct", "93pct")
 vax <- lapply(assumptions, function(a) {
-  readRDS(file.path(data_dir, sprintf("utaz_vaccination_adults_%s.rds", a)))
+  read_vaccination(
+    file.path(data_dir, sprintf("utaz_vaccination_adults_%s.csv", a))
+  )
 })
 names(vax) <- assumptions
 
 matrices <- list(
-  polymod  = readRDS(file.path(data_dir, "utaz_contacts_polymod.rds")),
-  epistorm = readRDS(file.path(data_dir, "utaz_contacts_epistorm.rds"))
+  polymod  = read_contacts(file.path(data_dir, "utaz_contacts_polymod.csv")),
+  epistorm = read_contacts(file.path(data_dir, "utaz_contacts_epistorm.csv"))
 )
 
 # ==============================================================================
