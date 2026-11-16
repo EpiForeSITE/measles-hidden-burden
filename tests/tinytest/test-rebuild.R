@@ -10,7 +10,7 @@ dir.create(file.path(build_dir, "data"), recursive = TRUE)
 file.copy(
   file.path(
     data_dir,
-    c("io.R", "utaz_data.R", "epistorm_matrix.R", "Total-M-by5_80-matrix.csv")
+    c("utaz_data.R", "epistorm_matrix.R", "Total-M-by5_80-matrix.csv")
   ),
   file.path(build_dir, "data")
 )
@@ -38,8 +38,8 @@ expect_equal(sort(built), sort(committed))
 
 for (f in committed) {
   expect_equal(
-    read.csv(file.path(build_dir, "data", f), check.names = FALSE),
-    read.csv(file.path(data_dir, f), check.names = FALSE),
+    data.table::fread(file.path(build_dir, "data", f)),
+    data.table::fread(file.path(data_dir, f)),
     tolerance = 1e-10,
     info      = f
   )

@@ -2,21 +2,27 @@
 # data/utaz_data.R and data/epistorm_matrix.R)
 
 data_dir <- file.path("..", "..", "data")
-source(file.path(data_dir, "io.R"))
+library(data.table)
 
-pop <- read_population(data_dir)
+pop <- c(
+  fread(file.path(data_dir, "utaz_population_ages.csv")),
+  fread(file.path(data_dir, "utaz_population_schools.csv"))
+)
 
 assumptions <- c("baseline", "78pct", "86pct", "93pct")
 vax <- lapply(assumptions, function(a) {
-  read_vaccination(
-    file.path(data_dir, sprintf("utaz_vaccination_adults_%s.csv", a))
-  )
+  fread(file.path(data_dir, sprintf("utaz_vaccination_adults_%s.csv", a)))
 })
 names(vax) <- assumptions
 
-matrices <- list(
-  polymod  = read_contacts(file.path(data_dir, "utaz_contacts_polymod.csv")),
-  epistorm = read_contacts(file.path(data_dir, "utaz_contacts_epistorm.csv"))
+matrices <- lapply(
+  c(polymod = "polymod", epistorm = "epistorm"),
+  function(m) {
+    as.matrix(
+      fread(file.path(data_dir, sprintf("utaz_contacts_%s.csv", m))),
+      rownames = "group"
+    )
+  }
 )
 
 # ==============================================================================

@@ -13,11 +13,9 @@
 # - utaz_vaccination_adults_<assumption>.csv: one table per adult vaccination
 #   assumption (see `vaccination_data()`), selected in template.qmd with the
 #   `vax_adults` parameter.
-#
-# The files are read with the functions in data/io.R.
 
+library(data.table)
 library(multigroup.vaccine)
-source(file.path("data", "io.R"))
 
 # ==============================================================================
 # Population by age (ACS 2024, table S0101)
@@ -63,12 +61,12 @@ for (a in unique(schoolagegroups)) {
   schoolpops[inds] <- schoolpopsnew
 }
 
-write_data(
-  data.frame(agelims = agelims, agepops = agepops),
+fwrite(
+  data.table(agelims = agelims, agepops = agepops),
   file.path("data", "utaz_population_ages.csv")
 )
-write_data(
-  data.frame(schoolagegroups = schoolagegroups, schoolpops = schoolpops),
+fwrite(
+  data.table(schoolagegroups = schoolagegroups, schoolpops = schoolpops),
   file.path("data", "utaz_population_schools.csv")
 )
 
@@ -92,7 +90,12 @@ grouppops <- c(
 
 stopifnot(max(abs(cm * grouppops - t(cm * grouppops))) < 1e-10)
 
-write_data(cm, file.path("data", "utaz_contacts_polymod.csv"))
+# 17 significant digits, so that fread() reads back the same numbers (with
+# fwrite()'s 15, the model runs differ)
+fwrite(
+  data.table(group = rownames(cm), apply(cm, 2, sprintf, fmt = "%.17g")),
+  file.path("data", "utaz_contacts_polymod.csv")
+)
 
 # ==============================================================================
 # Vaccination
@@ -154,8 +157,11 @@ save_vaccination <- function(adults = NULL) {
   assumption <- if (is.null(adults)) "baseline" else
     sprintf("%gpct", adults * 100)
 
-  write_data(
-    vaccination_data(adults),
+  # 17 significant digits, as for the contact matrix
+  vax <- vaccination_data(adults)
+  vax$vacc_rate <- sprintf("%.17g", vax$vacc_rate)
+  fwrite(
+    vax,
     file.path("data", sprintf("utaz_vaccination_adults_%s.csv", assumption))
   )
 
