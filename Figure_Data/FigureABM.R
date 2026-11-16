@@ -59,9 +59,6 @@ GRID_COLOR    <- "#e4e3df"
 FIGURE4_XLIM <- as.Date(c("2025-07-01", "2026-03-01"))
 
 #' Path of the simulation output of one scenario
-#'
-#' Matches files with and without the `-vax_adults_<assumption>` suffix (runs
-#' made before the adult vaccination assumptions were added are `baseline`).
 scenario_file <- function(
     dir,
     r0,
@@ -78,19 +75,12 @@ scenario_file <- function(
     ct
   )
 
-  candidates <- file.path(
-    dir,
-    paste0(stem, c(sprintf("-vax_adults_%s.rds", vax_adults), ".rds"))
-  )
-
-  if (vax_adults != "baseline") candidates <- candidates[1]
-
-  found <- candidates[file.exists(candidates)]
-  if (!length(found)) {
-    stop("No simulation output for ", stem, " in ", dir)
+  f <- file.path(dir, sprintf("%s-vax_adults_%s.rds", stem, vax_adults))
+  if (!file.exists(f)) {
+    stop("No simulation output for ", basename(f), " in ", dir)
   }
 
-  found[1]
+  f
 }
 
 #' Final outbreak sizes and weekly cases of the focal scenarios

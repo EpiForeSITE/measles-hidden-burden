@@ -2,6 +2,30 @@
 
 This repository contains the R code needed to reproduce the analyses in paper *"Hidden Burden of a Measles Outbreak Revealed by Genomic and Transmission Models"*. Dependencies include the [`measles`](https://github.com/UofUEpiBio/measles) R package (0.4.1 at commit [`d1e87fe`](https://github.com/UofUEpiBio/measles/commit/d1e87fed204ebe820620759fa1b85cdb9d2e0b03), built on [`epiworldR`](https://github.com/UofUEpiBio/epiworldR) 0.19.0 at commit [`ce1cb0f`](https://github.com/UofUEpiBio/epiworldR/commit/ce1cb0f088b9a3a19674fb6598b2c42780c72b12); both pinned in the dev container, see [`.devcontainer/Containerfile`](./.devcontainer/Containerfile)), [`multigroup.vaccine`](https://github.com/EpiForeSITE/multigroup-vaccine) (pinned to commit `ddd9201`) and [`socialmixr`](https://cran.r-project.org/package=socialmixr) (pinned to 0.7.0) for the population, contact, and vaccination data, [Quarto](https://quarto.org) for rendering reports, `ggplot2` for visualization, and `data.table` for data wrangling.
 
+## Repository layout
+
+| Path | Contents |
+|---|---|
+| [`template.qmd`](./template.qmd), [`Makefile`](./Makefile) | The agent-based model (one report per scenario) and the targets that run it |
+| [`data/`](./data) | Population, contact matrices, and vaccination data for the model |
+| [`scenarios/`](./scenarios) | Main model runs (R0 from 5 to 17) |
+| [`population_immunity/`](./population_immunity), [`sensitivity_epistorm/`](./sensitivity_epistorm), [`sensitivity_rash_redux/`](./sensitivity_rash_redux) | Sensitivity analyses |
+| [`Figure_Data/`](./Figure_Data) | Figure scripts, their inputs, and Figure 4 |
+| [`BedfordMethodCount.R`](./BedfordMethodCount.R), [`plotEBSP.R`](./plotEBSP.R) | Genomic burden estimate from the EBSP logs |
+| [`tests/tinytest/`](./tests/tinytest) | Checks of the data and the Figure 4 inputs |
+
+Each model folder has a `README.md` with one table and one figure summarizing its runs, plus a Markdown report and an `.rds` output per scenario.
+
+## Reproducing the paper
+
+| Output | Command | Result |
+|---|---|---|
+| Model data | `make data` | `data/*.csv` |
+| Main model runs | `make scenarios` | `scenarios/` |
+| Sensitivity analyses | `make population_immunity`, `make sensitivity_epistorm`, `make sensitivity_rash_redux` | One folder each |
+| Figure 4 | `make figures` | `Figure_Data/Figure4.{png,pdf}` |
+| Figures 1-3, SI5, SI6 | See [`Figure_Data/README.md`](./Figure_Data/README.md) | |
+
 ## Container
 
 The dev container ([`.devcontainer/Containerfile`](./.devcontainer/Containerfile)) pins the R packages used in the analyses. It is published to the GitHub Container Registry by [`.github/workflows/container.yml`](./.github/workflows/container.yml) (tags `latest`, the release version, and the commit SHA):
@@ -134,7 +158,7 @@ The Utah DHHS Measles Disease Plan cited above is the edition last updated March
 
 ### Genomic burden estimate ([`BedfordMethodCount.R`](./BedfordMethodCount.R), [`plotEBSP.R`](./plotEBSP.R))
 
-[`BedfordMethodCount.R`](https://github.com/EpiForeSITE/measles-hidden-burden/blob/main/BedfordMethodCount.R) is on `main` (added after this branch was created). These values convert the effective population size from the extended Bayesian skyline (EBSP) into case counts. They are not `measles` package parameters, so there is no package default.
+These values convert the effective population size from the extended Bayesian skyline (EBSP) into case counts. They are not `measles` package parameters, so there is no package default.
 
 | Parameter | Value used | Source |
 |---|---|---|
