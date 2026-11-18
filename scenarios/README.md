@@ -81,7 +81,7 @@ respectively.
 The median peak-incidence week began October 20, 2025 and had 498
 infections with no interventions, began October 27, 2025 and had 412
 infections with self-isolation only, and began November 10, 2025 and had
-249 infections with self-isolation and quarantine (Figure 4). Here,
+249 infections with self-isolation and quarantine (Figure 3). Here,
 weekly peak incidence is calculated for each retained simulation before
 taking the median across simulations. The phylodynamic estimates of
 outbreak size were not substantially larger than those from the
