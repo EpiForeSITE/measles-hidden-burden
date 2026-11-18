@@ -9,16 +9,14 @@
 #   25% contact-tracing success, from the run *with* quarantine
 #
 # Each scenario file holds two runs, with quarantine (`outbreak_size`) and
-# without (`outbreak_size_no_quarantine`). The published Figure 4C-D drew all
-# three scenarios from the run without quarantine; `--paper-arms` reproduces
-# that choice.
+# without (`outbreak_size_no_quarantine`). The quarantine scenario uses the
+# former; the other two scenarios use the latter.
 #
 # Usage (from the repository root):
 #
-#   Rscript Figure_Data/FigureABM.R [scenarios_dir] [--paper-arms]
+#   Rscript Figure_Data/FigureABM.R [scenarios_dir]
 #
-# Writes Figure_Data/Figure4CD.{png,pdf} (Figure4CD_paper_arms.* with
-# --paper-arms).
+# Writes Figure_Data/Figure4CD.{png,pdf}.
 
 library(data.table)
 library(ggplot2)
@@ -86,19 +84,18 @@ scenario_file <- function(
 #' Final outbreak sizes and weekly cases of the focal scenarios
 #'
 #' @return A list with `final` (one row per retained run: final outbreak size
-#'   at day 365) and `weekly` (median and IQR of the new cases per calendar
-#'   week, Monday to Sunday, across the retained runs), plus `runs` (number of
-#'   runs and retained runs per scenario).
+#'   at day 365), `weekly_simulations` (weekly cases in each retained run),
+#'   `weekly` (median and IQR of weekly cases across retained runs), `peak`
+#'   (peak-incidence date for each retained run), and `runs` (number of runs
+#'   and retained runs per scenario).
 abm_summaries <- function(
     dir        = "scenarios",
     r0         = 9,
-    paper_arms = FALSE,
     min_size   = MIN_OUTBREAK_SIZE,
     vax_adults = "baseline",
     epistorm   = FALSE
 ) {
   scenarios <- copy(FOCAL_SCENARIOS)
-  if (paper_arms) scenarios[, arm := "outbreak_size_no_quarantine"]
 
   sims <- rbindlist(lapply(seq_len(nrow(scenarios)), function(i) {
     s <- scenarios[i]
@@ -132,6 +129,12 @@ abm_summaries <- function(
     by = .(scenario, sim_num)
   ]
   sims[, calendar_date := START_DATE + date]
+
+  # Keep the first date when several days share a run's maximum incidence.
+  peak <- sims[order(scenario, sim_num, date),
+    .SD[which.max(new_cases)], by = .(scenario, sim_num)
+  ][, .(scenario, sim_num, peak_date = calendar_date)]
+
   sims[,
     week := calendar_date - (as.integer(format(calendar_date, "%u")) - 1L)
   ]
@@ -152,13 +155,15 @@ abm_summaries <- function(
 
   final[, calendar_date := START_DATE + date]
 
-  for (x in list(final, weekly, runs)) {
+  for (x in list(final, per_week, weekly, peak, runs)) {
     x[, scenario := factor(scenario, levels = FOCAL_SCENARIOS$label)]
   }
 
   list(
     final  = final[, .(scenario, sim_num, calendar_date, outbreak_size)],
+    weekly_simulations = per_week,
     weekly = weekly,
+    peak   = peak,
     runs   = runs[order(scenario)]
   )
 }
@@ -360,12 +365,10 @@ save_abm_figure <- function(
 }
 
 if (sys.nframe() == 0L) {
-  args       <- commandArgs(trailingOnly = TRUE)
-  paper_arms <- "--paper-arms" %in% args
-  dir        <- setdiff(args, "--paper-arms")
-  dir        <- if (length(dir)) dir[1] else "scenarios"
+  args <- commandArgs(trailingOnly = TRUE)
+  dir  <- if (length(args)) args[1] else "scenarios"
 
-  summaries <- abm_summaries(dir, paper_arms = paper_arms)
+  summaries <- abm_summaries(dir)
 
   print(summaries$runs)
   print(summaries$final[,
@@ -377,9 +380,6 @@ if (sys.nframe() == 0L) {
     by = scenario
   ])
 
-  out <- file.path(
-    "Figure_Data",
-    if (paper_arms) "Figure4CD_paper_arms" else "Figure4CD"
-  )
+  out <- file.path("Figure_Data", "Figure4CD")
   message("Saved ", paste(save_abm_figure(summaries, out), collapse = ", "))
 }

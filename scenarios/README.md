@@ -16,47 +16,91 @@ scenario has 1,000 runs; runs with fewer than 10 cases are early
 extinctions, and the final outbreak sizes are over the remaining
 (retained) runs.
 
-<div id="tbl-scenarios">
+<div id="tbl-si3">
 
-Table 1: Runs with 10 or more cases out of 1,000, and final outbreak
-size at day 365, median (interquartile range) across those runs.
+Table 1: Table SI 3. Median outbreak size for agent-based-model
+simulations that did not go stochastically extinct. Final outbreak size
+is measured at day 365; medians and interquartile ranges are across runs
+with 10 or more cases.
 
 <div class="cell-output-display">
 
-|  R0 | Scenario                       | Retained runs (%) |          Infections |
-|----:|:-------------------------------|------------------:|--------------------:|
-|   5 | No interventions               |       544 (54.4%) | 2,133 (2,108-2,163) |
-|   5 | Self-isolation only            |       429 (42.9%) | 1,825 (1,788-1,862) |
-|   5 | Self-isolation with quarantine |       312 (31.2%) | 1,237 (1,144-1,312) |
-|   7 | No interventions               |       678 (67.8%) | 2,523 (2,503-2,542) |
-|   7 | Self-isolation only            |       595 (59.5%) | 2,322 (2,298-2,347) |
-|   7 | Self-isolation with quarantine |       477 (47.7%) | 1,830 (1,792-1,866) |
-|   9 | No interventions               |       787 (78.7%) | 2,703 (2,688-2,716) |
-|   9 | Self-isolation only            |       698 (69.8%) | 2,567 (2,550-2,584) |
-|   9 | Self-isolation with quarantine |       577 (57.7%) | 2,136 (2,104-2,165) |
-|  11 | No interventions               |       834 (83.4%) | 2,795 (2,783-2,807) |
-|  11 | Self-isolation only            |       767 (76.7%) | 2,702 (2,688-2,717) |
-|  11 | Self-isolation with quarantine |       667 (66.7%) | 2,316 (2,292-2,341) |
-|  13 | No interventions               |       870 (87.0%) | 2,847 (2,837-2,857) |
-|  13 | Self-isolation only            |       815 (81.5%) | 2,784 (2,772-2,795) |
-|  13 | Self-isolation with quarantine |       731 (73.1%) | 2,436 (2,414-2,456) |
-|  15 | No interventions               |       901 (90.1%) | 2,879 (2,870-2,888) |
-|  15 | Self-isolation only            |       858 (85.8%) | 2,833 (2,822-2,843) |
-|  15 | Self-isolation with quarantine |       773 (77.3%) | 2,516 (2,495-2,538) |
-|  17 | No interventions               |       922 (92.2%) | 2,899 (2,891-2,908) |
-|  17 | Self-isolation only            |       877 (87.7%) | 2,864 (2,855-2,874) |
-|  17 | Self-isolation with quarantine |       800 (80.0%) | 2,576 (2,558-2,594) |
+| R0 | No interventions: Median | No interventions: IQR | Self-isolation only: Median | Self-isolation only: IQR | Self-isolation and quarantine: Median | Self-isolation and quarantine: IQR |
+|---:|---:|---:|---:|---:|---:|---:|
+| 5 | 2133 | 2,108-2,163 | 1825 | 1,788-1,862 | 1237 | 1,144-1,312 |
+| 7 | 2523 | 2,503-2,542 | 2322 | 2,298-2,347 | 1830 | 1,792-1,866 |
+| 9 | 2703 | 2,688-2,716 | 2567 | 2,550-2,584 | 2136 | 2,104-2,165 |
+| 11 | 2795 | 2,783-2,807 | 2702 | 2,688-2,717 | 2316 | 2,292-2,341 |
+| 13 | 2847 | 2,837-2,857 | 2784 | 2,772-2,795 | 2436 | 2,414-2,456 |
+| 15 | 2879 | 2,870-2,888 | 2833 | 2,822-2,843 | 2516 | 2,495-2,538 |
+| 17 | 2899 | 2,891-2,908 | 2864 | 2,855-2,874 | 2576 | 2,558-2,594 |
 
 </div>
 
 </div>
+
+<div id="tbl-si4">
+
+Table 2: Table SI 4. Median peak date for agent-based-model simulations
+that did not go stochastically extinct. Peak date is the first day of
+maximum daily incidence; medians are across runs with 10 or more cases.
+
+<div class="cell-output-display">
+
+|  R0 | No interventions | Self-isolation only | Self-isolation and quarantine |
+|----:|-----------------:|--------------------:|------------------------------:|
+|   5 |       12-03-2025 |          12-26-2025 |                    01-21-2026 |
+|   7 |       11-05-2025 |          11-18-2025 |                    12-07-2025 |
+|   9 |       10-21-2025 |          10-29-2025 |                    11-09-2025 |
+|  11 |       10-12-2025 |          10-17-2025 |                    10-26-2025 |
+|  13 |       10-03-2025 |          10-10-2025 |                    10-19-2025 |
+|  15 |       09-29-2025 |          10-04-2025 |                    10-10-2025 |
+|  17 |       09-25-2025 |          09-30-2025 |                    10-05-2025 |
+
+</div>
+
+</div>
+
+Simulations were initialized with a single infectious individual on
+August 6, 2025, and 1000 stochastic realizations were performed per
+scenario. 213 (21.3%), 302 (30.2%), and 423 (42.3%) resulted in early
+extinction (fewer than 10 cases) and were excluded from analysis for no
+interventions, self-isolation only, and self-isolation with quarantine,
+respectively. Among the remaining simulations, the median outbreak size
+was 2,703 infections (IQR: 2,688-2,716) with no interventions, 2,567
+infections (IQR: 2,550-2,584) with self-isolation only, and 2,136
+infections (IQR: 2,104-2,165) with self-isolation and quarantine (Figure
+4). These estimates were 4.6-fold, 4.4-fold, and 3.7-fold higher,
+respectively, than the 585 confirmed cases reported in Utah and Arizona
+through February 28, 2026. Confirmed cases therefore represented 21.6%,
+22.8%, and 27.4% of estimated infections. The probability of a large
+outbreak (\>100 cases) was 78.7%, 69.8%, and 57.2% under no
+interventions, self-isolation only, and self-isolation with quarantine,
+respectively.
+
+The median peak-incidence week began October 20, 2025 and had 498
+infections with no interventions, began October 27, 2025 and had 412
+infections with self-isolation only, and began November 10, 2025 and had
+249 infections with self-isolation and quarantine (Figure 4). Here,
+weekly peak incidence is calculated for each retained simulation before
+taking the median across simulations. The phylodynamic estimates of
+outbreak size were not substantially larger than those from the
+agent-based simulations, reflecting concordance between approaches.
 
 <div id="fig-scenarios">
 
 ![](README_files/figure-commonmark/fig-scenarios-1.png)
 
-Figure 1: Final outbreak size at day 365 (median and interquartile range
-across the retained runs) and share of runs with 10 or more cases, by
-R0. The dashed line marks R0 = 9, the runs of Figure 4.
+Figure 1: Projected outbreak size and probability of sustained
+transmission across basic reproduction numbers. Agent-based model
+simulations were conducted across values of R0 from 5 to 17 under three
+scenarios: no interventions, self-isolation only (50% reduction in
+contacts after rash onset), and self-isolation with quarantine (75%
+reduction in contacts after rash onset plus contact tracing and
+quarantine). The left panel shows the median final community outbreak
+size at day 365; points and vertical bars denote the median and
+interquartile range among simulations with at least 10 cases. The right
+panel shows the percentage of 1,000 simulations per scenario that
+produced at least 10 cases. The dashed vertical line marks R0 = 9.
 
 </div>

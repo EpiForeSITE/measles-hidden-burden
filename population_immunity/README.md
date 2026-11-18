@@ -41,7 +41,13 @@ across the retained runs; the ratio is of the medians.
 
 ![](README_files/figure-commonmark/fig-population-immunity-1.png)
 
-Figure 1: Final outbreak size at day 365 by adult vaccination
-assumption: medians and interquartile ranges across the retained runs.
+Figure 1: Figure SI 11. Projected final outbreak size at R0 = 9 under
+alternative adult vaccination-coverage assumptions. Simulations used the
+baseline coverage and 78%, 86%, and 93% coverage among adults aged 18-69
+years, under no interventions, self-isolation only, and self-isolation
+with quarantine. Panels show total infections, infections among children
+younger than 18 years, and infections among adults aged 18 years or
+older. Points and vertical bars denote the median and interquartile
+range at day 365 across simulations with at least 10 cases.
 
 </div>
