@@ -90,13 +90,13 @@ The `EPISTORM=FALSE` will use POLYMOD's contact data (default), setting it to `T
 Figure 4 is built with `make figures`:
 
 - [`Figure_Data/FigurePhylodynamic.R`](./Figure_Data/FigurePhylodynamic.R): phylodynamic panels (A, effective population size; B, linked outbreak size) from the EBSP logs (`Figure_Data/EBSP_*.log`), in `Figure_Data/Figure4AB.{png,pdf}`, and the full figure in `Figure_Data/Figure4.{png,pdf}`.
-- [`Figure_Data/FigureABM.R`](./Figure_Data/FigureABM.R): agent-based model panels (C, weekly cases; D, final outbreak size) from the R0 = 9 scenario outputs in `scenarios/`, in `Figure_Data/Figure4CD.{png,pdf}` and `Figure4CD_paper_arms.{png,pdf}`.
+- [`Figure_Data/FigureABM.R`](./Figure_Data/FigureABM.R): agent-based model panels (C, weekly cases; D, final outbreak size) from the R0 = 9 scenario outputs in `scenarios/`, in `Figure_Data/Figure4CD.{png,pdf}`.
 
 For A, Nₑ is scaled by σ / generation time, with σ = 1/R0 + 1/0.34 + 1 at R0 = 9 and a generation time of 11.9 days, after a 10% burn-in; the band is the 2.5%-97.5% interval across posterior samples. For B, the scaled Nₑ is summed once per generation time, taking the largest value within ±0.015 years ([`BedfordMethodCount.R`](./BedfordMethodCount.R)); the bounds are the same sums of the interval limits.
 
 For C and D, runs with fewer than 10 cases are excluded as early extinctions. Weekly cases are summed over Monday-to-Sunday weeks starting August 6, 2025 (day 0, one infectious case), and summarized by the median and interquartile range across the retained runs. The final outbreak size is the cumulative number of infections at day 365.
 
-Each scenario output holds a run with quarantine and one without. "Self-isolation with quarantine" (75% rash contact reduction, 25% contact-tracing success) uses the run with quarantine; the other two scenarios have no contact tracing and use the run without. The preprint's Figure 4C-D drew all three scenarios from the run without quarantine; `Figure4CD_paper_arms` reproduces that choice.
+Each scenario output holds a run with quarantine and one without. "Self-isolation with quarantine" (75% rash contact reduction, 25% contact-tracing success) uses the run with quarantine; the other two scenarios have no contact tracing and use the run without.
 
 ## Parameters & references
 
@@ -138,7 +138,7 @@ Each set has a summary (Summary column) with one table and one figure, rendered 
 | Prodromal period (`prodromal_period`) | 4 days | Utah DHHS plan: prodrome lasts 2–4 days (range 2–8); contagious 4 days before rash onset. |
 | Rash period (`rash_period`) | 4 days | Utah DHHS plan: contagious to 4 days after rash onset. |
 | Rash contact reduction (`rash_reduction_contact_rate`) | 0, 0.5 or 0.75 (scenarios); 0–1 (sensitivity analysis) | Assumption. Agents with rash keep 100%, 50% or 25% of their contacts. |
-| Hospitalization rate (`hospitalization_rate`) | 0.0278 per day (a 10% probability) | Jones et al. 2026, *NEJM Evid* 5(8), [doi:10.1056/EVIDpha2600141](https://doi.org/10.1056/EVIDpha2600141): 8% overall, 9% among unvaccinated in Utah. The model takes a daily rate: h = p·(1/rash) / (1 − p) = 0.1 × (1/4) / 0.9. |
+| Hospitalization rate (`hospitalization_rate`) | 0.0278 per day (a 10% probability) | CDC: 119 of 1,249 U.S. measles cases (10%) were hospitalized in 2019 ([Patel et al. 2019, *MMWR*](https://www.cdc.gov/mmwr/volumes/68/wr/mm6840e2.htm)). For local context, Jones et al. 2026, *NEJM Evid* 5(8), [doi:10.1056/EVIDpha2600141](https://doi.org/10.1056/EVIDpha2600141), reported 8% overall and 9% among unvaccinated persons in Utah. The model takes a daily rate: h = p·(1/rash) / (1 − p) = 0.1 × (1/4) / 0.9. |
 | Hospitalization period (`hospitalization_period`) | 7 days | Assumption. |
 | Days undetected (`days_undetected`) | 2 days | Assumption: on average, it takes about two days to detect a case. |
 | Quarantine period (`quarantine_period`) | 21 days; −1 (no quarantine) in the comparison scenario | Utah DHHS plan: 21 days since last exposure. The no-quarantine scenario uses `set_param(measles_model, "Quarantine period", -1)`. |

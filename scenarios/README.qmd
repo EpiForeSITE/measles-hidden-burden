@@ -51,29 +51,150 @@ The three focal scenarios of the main analysis (`make scenarios`) for R0 = 5, 7,
 As in Figure 4 (R0 = 9), self-isolation with quarantine uses the run with quarantine and the other two scenarios the run without. Each scenario has 1,000 runs; runs with fewer than `r MIN_OUTBREAK_SIZE` cases are early extinctions, and the final outbreak sizes are over the remaining (retained) runs.
 
 ```{r}
-#| label: tbl-scenarios
-tab <- sizes[order(r0, scenario), .(
-  r0, scenario,
-  retained = sprintf("%s (%.1f%%)", fmt(retained), 100 * retained / runs),
-  size     = sprintf("%s (%s-%s)", fmt(median), fmt(q25), fmt(q75))
-)]
+#| label: tbl-si3
+# Supplementary Table SI 3: reshape the three scenario summaries into the
+# side-by-side layout used in the supplemental materials.
+scenario_order <- c(
+  "No interventions",
+  "Self-isolation only",
+  "Self-isolation with quarantine"
+)
+scenario_names <- c(
+  "No interventions",
+  "Self-isolation only",
+  "Self-isolation and quarantine"
+)
+
+table_si3 <- sizes[
+  order(r0, match(scenario, scenario_order)),
+  .(r0, scenario, median, iqr = sprintf("%s-%s", fmt(q25), fmt(q75)))
+][
+  , dcast(.SD, r0 ~ scenario, value.var = c("median", "iqr"))
+]
+
+setcolorder(
+  table_si3,
+  c(
+    "r0",
+    "median_No interventions", "iqr_No interventions",
+    "median_Self-isolation only", "iqr_Self-isolation only",
+    "median_Self-isolation with quarantine",
+    "iqr_Self-isolation with quarantine"
+  )
+)
+
+setnames(
+  table_si3,
+  c(
+    "R0",
+    paste(rep(scenario_names, each = 2), c("Median", "IQR"), sep = ": ")
+  )
+)
 
 kable(
-  tab,
-  col.names = c("R0", "Scenario", "Retained runs (%)", "Infections"),
-  align     = "rlrr",
-  caption   = paste(
-    "Runs with 10 or more cases out of 1,000, and final outbreak size at",
-    "day 365, median (interquartile range) across those runs."
+  table_si3,
+  align = "r",
+  caption = paste(
+    "Table SI 3. Median outbreak size for agent-based-model simulations that",
+    "did not go stochastically extinct. Final outbreak size is measured at day",
+    "365; medians and interquartile ranges are across runs with 10 or more cases."
   )
 )
 ```
 
 ```{r}
+#| label: tbl-si4
+# A run's peak date is the first day with its maximum number of incident
+# infections. Taking the median across retained runs gives the SI 4 dates.
+peaks <- rbindlist(lapply(R0_VALUES, function(r0) {
+  s <- abm_summaries(".", r0)
+  s$peak[, .(peak_date = median(peak_date)), by = scenario][, r0 := r0]
+}))
+
+table_si4 <- dcast(
+  peaks[order(r0, match(scenario, scenario_order))],
+  r0 ~ scenario,
+  value.var = "peak_date"
+)
+setcolorder(table_si4, c("r0", scenario_order))
+setnames(table_si4, c("R0", scenario_names))
+
+for (column in scenario_names) {
+  set(
+    table_si4,
+    j = column,
+    value = format(as.Date(table_si4[[column]], origin = "1970-01-01"), "%m-%d-%Y")
+  )
+}
+
+kable(
+  table_si4,
+  align = "r",
+  caption = paste(
+    "Table SI 4. Median peak date for agent-based-model simulations that did",
+    "not go stochastically extinct. Peak date is the first day of maximum",
+    "daily incidence; medians are across runs with 10 or more cases."
+  )
+)
+```
+
+```{r}
+#| label: results-r0-9
+# Results used in the manuscript text: the main R0 = 9 scenarios and the
+# 585 confirmed cases reported in Utah and Arizona through February 28, 2026.
+R0_MAIN <- 9
+CONFIRMED_CASES <- 585
+
+r0_main <- abm_summaries(".", R0_MAIN)
+results_main <- r0_main$final[,
+  .(
+    median = median(outbreak_size),
+    q25 = quantile(outbreak_size, 0.25, names = FALSE),
+    q75 = quantile(outbreak_size, 0.75, names = FALSE),
+    large = sum(outbreak_size > 100)
+  ),
+  by = scenario
+][
+  r0_main$runs,
+  on = "scenario"
+][
+  , `:=`(
+    extinct = runs - retained,
+    extinct_pct = 100 * (runs - retained) / runs,
+    large_pct = 100 * large / runs,
+    fold_over_confirmed = median / CONFIRMED_CASES,
+    confirmed_pct = 100 * CONFIRMED_CASES / median
+  )
+][
+  match(scenario, scenario_order)
+]
+
+peak_main <- r0_main$weekly_simulations[
+  order(scenario, sim_num, week),
+  .SD[which.max(cases)],
+  by = .(scenario, sim_num)
+][
+  , .(
+    # A calendar-week median can fall between two weeks. The lower middle week
+    # keeps the reported week a Monday-to-Sunday epidemiological week.
+    peak_week = week[order(week)][ceiling(.N / 2)],
+    median_weekly_incidence = median(cases)
+  ),
+  by = scenario
+][
+  match(scenario, scenario_order)
+]
+```
+
+Simulations were initialized with a single infectious individual on August 6, 2025, and `r results_main$runs[1]` stochastic realizations were performed per scenario. `r fmt(results_main$extinct[1])` (`r sprintf("%.1f%%", results_main$extinct_pct[1])`), `r fmt(results_main$extinct[2])` (`r sprintf("%.1f%%", results_main$extinct_pct[2])`), and `r fmt(results_main$extinct[3])` (`r sprintf("%.1f%%", results_main$extinct_pct[3])`) resulted in early extinction (fewer than 10 cases) and were excluded from analysis for no interventions, self-isolation only, and self-isolation with quarantine, respectively. Among the remaining simulations, the median outbreak size was `r fmt(results_main$median[1])` infections (IQR: `r fmt(results_main$q25[1])`-`r fmt(results_main$q75[1])`) with no interventions, `r fmt(results_main$median[2])` infections (IQR: `r fmt(results_main$q25[2])`-`r fmt(results_main$q75[2])`) with self-isolation only, and `r fmt(results_main$median[3])` infections (IQR: `r fmt(results_main$q25[3])`-`r fmt(results_main$q75[3])`) with self-isolation and quarantine (Figure 4). These estimates were `r sprintf("%.1f", results_main$fold_over_confirmed[1])`-fold, `r sprintf("%.1f", results_main$fold_over_confirmed[2])`-fold, and `r sprintf("%.1f", results_main$fold_over_confirmed[3])`-fold higher, respectively, than the `r fmt(CONFIRMED_CASES)` confirmed cases reported in Utah and Arizona through February 28, 2026. Confirmed cases therefore represented `r sprintf("%.1f%%", results_main$confirmed_pct[1])`, `r sprintf("%.1f%%", results_main$confirmed_pct[2])`, and `r sprintf("%.1f%%", results_main$confirmed_pct[3])` of estimated infections. The probability of a large outbreak (>100 cases) was `r sprintf("%.1f%%", results_main$large_pct[1])`, `r sprintf("%.1f%%", results_main$large_pct[2])`, and `r sprintf("%.1f%%", results_main$large_pct[3])` under no interventions, self-isolation only, and self-isolation with quarantine, respectively.
+
+The median peak-incidence week began `r format(peak_main$peak_week[1], "%B %d, %Y")` and had `r fmt(peak_main$median_weekly_incidence[1])` infections with no interventions, began `r format(peak_main$peak_week[2], "%B %d, %Y")` and had `r fmt(peak_main$median_weekly_incidence[2])` infections with self-isolation only, and began `r format(peak_main$peak_week[3], "%B %d, %Y")` and had `r fmt(peak_main$median_weekly_incidence[3])` infections with self-isolation and quarantine (Figure 3). Here, weekly peak incidence is calculated for each retained simulation before taking the median across simulations. The phylodynamic estimates of outbreak size were not substantially larger than those from the agent-based simulations, reflecting concordance between approaches.
+
+```{r}
 #| label: fig-scenarios
 #| fig-width: 9
 #| fig-height: 4
-#| fig-cap: "Final outbreak size at day 365 (median and interquartile range across the retained runs) and share of runs with 10 or more cases, by R0. The dashed line marks R0 = 9, the runs of Figure 4."
+#| fig-cap: "Projected outbreak size and probability of sustained transmission across basic reproduction numbers. Agent-based model simulations were conducted across values of R0 from 5 to 17 under three scenarios: no interventions, self-isolation only (50% reduction in contacts after rash onset), and self-isolation with quarantine (75% reduction in contacts after rash onset plus contact tracing and quarantine). The left panel shows the median final community outbreak size at day 365; points and vertical bars denote the median and interquartile range among simulations with at least 10 cases. The right panel shows the percentage of 1,000 simulations per scenario that produced at least 10 cases. The dashed vertical line marks R0 = 9."
 fig_data <- rbind(
   sizes[, .(
     r0, scenario,
