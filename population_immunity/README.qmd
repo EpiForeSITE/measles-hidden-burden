@@ -25,6 +25,16 @@ ASSUMPTIONS <- c(
   "93pct"  = "93%"
 )
 ADULTS <- c("18to24", "25to44", "45to69", "70+")
+
+# Vaccination coverage of adults aged 18-69 under the baseline assumption
+vax_baseline <- fread(
+  file.path("..", "data", "utaz_vaccination_adults_baseline.csv")
+)[age_labels %in% c("18to24", "25to44", "45to69")]
+baseline_pct <- sprintf(
+  "%.0f%%",
+  100 * vax_baseline[, sum(vacc_rate * agepops) / sum(agepops)]
+)
+ASSUMPTIONS[["baseline"]] <- sprintf("Baseline (%s)", baseline_pct)
 GROUPS <- c("Total", "Children", "Adults")
 
 fmt <- function(x) formatC(round(x), format = "d", big.mark = ",")
@@ -122,7 +132,7 @@ kable(
 #| label: fig-population-immunity
 #| fig-width: 9
 #| fig-height: 4
-#| fig-cap: "Figure SI 11. Projected final outbreak size at R0 = 9 under alternative adult vaccination-coverage assumptions. Simulations used the baseline coverage and 78%, 86%, and 93% coverage among adults aged 18-69 years, under no interventions, self-isolation only, and self-isolation with quarantine. Panels show total infections, infections among children younger than 18 years, and infections among adults aged 18 years or older. Points denote the median at day 365 across simulations with at least 10 cases; vertical bars denote the 95% interval (2.5th to 97.5th percentiles) across those simulations."
+#| fig-cap: !expr paste0("Figure SI 11. Projected final outbreak size at R0 = 9 under alternative adult vaccination-coverage assumptions. Simulations used the baseline coverage (", baseline_pct, ") and 78%, 86%, and 93% coverage among adults aged 18-69 years, under no interventions, self-isolation only, and self-isolation with quarantine. Panels show total infections, infections among children younger than 18 years, and infections among adults aged 18 years or older. Points denote the median at day 365 across simulations with at least 10 cases; vertical bars denote the 95% interval (2.5th to 97.5th percentiles) across those simulations.")
 dodge <- position_dodge(width = 0.3)
 
 ggplot(sizes, aes(vax_adults, median, color = model, group = model)) +
@@ -143,6 +153,7 @@ ggplot(sizes, aes(vax_adults, median, color = model, group = model)) +
     ))
   ) +
   scale_color_manual(values = SCENARIO_COLORS) +
+  scale_x_discrete(labels = function(x) sub(" (", "\n(", x, fixed = TRUE)) +
   scale_y_continuous(labels = fmt, limits = c(0, NA)) +
   labs(x = "Adult vaccination coverage (ages 18-69)", y = "Infections") +
   theme_figure4() +

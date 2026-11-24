@@ -20,9 +20,9 @@ across the retained runs; the ratio is of the medians.
 
 | Adult vaccination | Scenario | Retained runs | Total infections | Children | Adults | Child:adult ratio |
 |:---|:---|---:|---:|---:|---:|---:|
-| Baseline | No interventions | 777 | 2,700 (2,686-2,715) | 1,739 (1,731-1,747) | 961 (951-972) | 1.8 |
-| Baseline | Self-isolation only | 703 | 2,567 (2,547-2,585) | 1,680 (1,670-1,691) | 887 (872-899) | 1.9 |
-| Baseline | Self-isolation with quarantine | 594 | 2,138 (2,106-2,167) | 1,447 (1,426-1,466) | 690 (673-707) | 2.1 |
+| Baseline (68%) | No interventions | 777 | 2,700 (2,686-2,715) | 1,739 (1,731-1,747) | 961 (951-972) | 1.8 |
+| Baseline (68%) | Self-isolation only | 703 | 2,567 (2,547-2,585) | 1,680 (1,670-1,691) | 887 (872-899) | 1.9 |
+| Baseline (68%) | Self-isolation with quarantine | 594 | 2,138 (2,106-2,167) | 1,447 (1,426-1,466) | 690 (673-707) | 2.1 |
 | 78% | No interventions | 726 | 2,295 (2,280-2,311) | 1,720 (1,713-1,730) | 575 (564-586) | 3.0 |
 | 78% | Self-isolation only | 646 | 2,157 (2,138-2,177) | 1,656 (1,644-1,668) | 500 (487-513) | 3.3 |
 | 78% | Self-isolation with quarantine | 532 | 1,781 (1,750-1,806) | 1,415 (1,395-1,434) | 366 (353-379) | 3.9 |
@@ -43,12 +43,12 @@ across the retained runs; the ratio is of the medians.
 
 Figure 1: Figure SI 11. Projected final outbreak size at R0 = 9 under
 alternative adult vaccination-coverage assumptions. Simulations used the
-baseline coverage and 78%, 86%, and 93% coverage among adults aged 18-69
-years, under no interventions, self-isolation only, and self-isolation
-with quarantine. Panels show total infections, infections among children
-younger than 18 years, and infections among adults aged 18 years or
-older. Points denote the median at day 365 across simulations with at
-least 10 cases; vertical bars denote the 95% interval (2.5th to 97.5th
-percentiles) across those simulations.
+baseline coverage (68%) and 78%, 86%, and 93% coverage among adults aged
+18-69 years, under no interventions, self-isolation only, and
+self-isolation with quarantine. Panels show total infections, infections
+among children younger than 18 years, and infections among adults aged
+18 years or older. Points denote the median at day 365 across
+simulations with at least 10 cases; vertical bars denote the 95%
+interval (2.5th to 97.5th percentiles) across those simulations.
 
 </div>

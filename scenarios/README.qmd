@@ -206,10 +206,9 @@ p_size <- ggplot(
   scale_x_continuous(breaks = R0_VALUES) +
   scale_y_continuous(labels = fmt, limits = c(0, NA)) +
   labs(
-    x     = expression(R[0]),
-    y     = "Final outbreak size",
-    title = "Final outbreak size for all model runs",
-    tag   = "A"
+    x   = expression(R[0]),
+    y   = "Final outbreak size for all model runs",
+    tag = "A"
   ) +
   theme_submission()
 
@@ -224,10 +223,9 @@ p_share <- ggplot(
   scale_x_continuous(breaks = R0_VALUES) +
   scale_y_continuous(limits = c(0, 100)) +
   labs(
-    x     = expression(R[0]),
-    y     = "Runs with 10 or more cases (%)",
-    title = "% of model runs resulting in an outbreak",
-    tag   = "B"
+    x   = expression(R[0]),
+    y   = "% of model runs resulting in an outbreak",
+    tag = "B"
   ) +
   theme_submission() +
   theme(legend.position = c(0.68, 0.2))
