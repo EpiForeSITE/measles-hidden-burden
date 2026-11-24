@@ -69,6 +69,9 @@ sizes <- melt(
 sizes[, vax_adults := factor(vax_adults, names(ASSUMPTIONS), ASSUMPTIONS)]
 sizes[, model := factor(model, FOCAL_SCENARIOS$label)]
 sizes[, group := factor(group, GROUPS)]
+
+# Width of the interquartile ranges (for the figure caption)
+iqr_width <- sizes$q75 - sizes$q25
 ```
 
 The three focal scenarios of Figure 4 at R0 = 9 (`make population_immunity`), for each assumption on the vaccination coverage of adults aged 18 to 69: the current one (`baseline`) and the alternate adult immunization assumptions of the [`multigroup.vaccine` vignette](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/utaz_age_school.html), with 78%, 86%, and 93% coverage. Each scenario has 1,000 runs; runs with fewer than `r MIN_OUTBREAK_SIZE` cases are excluded as early extinctions. As in Figure 4, self-isolation with quarantine uses the run with quarantine and the other two scenarios the run without. Children are those under 18.
@@ -120,7 +123,7 @@ kable(
 #| label: fig-population-immunity
 #| fig-width: 9
 #| fig-height: 4
-#| fig-cap: "Figure SI 11. Projected final outbreak size at R0 = 9 under alternative adult vaccination-coverage assumptions. Simulations used the baseline coverage and 78%, 86%, and 93% coverage among adults aged 18-69 years, under no interventions, self-isolation only, and self-isolation with quarantine. Panels show total infections, infections among children younger than 18 years, and infections among adults aged 18 years or older. Points and vertical bars denote the median and interquartile range at day 365 across simulations with at least 10 cases."
+#| fig-cap: !expr paste("Figure SI 11. Projected final outbreak size at R0 = 9 under alternative adult vaccination-coverage assumptions. Simulations used the baseline coverage and 78%, 86%, and 93% coverage among adults aged 18-69 years, under no interventions, self-isolation only, and self-isolation with quarantine. Panels show total infections, infections among children younger than 18 years, and infections among adults aged 18 years or older. Points denote the median at day 365 across simulations with at least 10 cases. The interquartile ranges are drawn as vertical bars but are mostly hidden by the points, since they span only", fmt(min(iqr_width)), "to", fmt(max(iqr_width)), "infections; they are listed in the table.")
 dodge <- position_dodge(width = 0.3)
 
 ggplot(sizes, aes(vax_adults, median, color = model, group = model)) +

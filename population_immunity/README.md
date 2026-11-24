@@ -47,7 +47,9 @@ baseline coverage and 78%, 86%, and 93% coverage among adults aged 18-69
 years, under no interventions, self-isolation only, and self-isolation
 with quarantine. Panels show total infections, infections among children
 younger than 18 years, and infections among adults aged 18 years or
-older. Points and vertical bars denote the median and interquartile
-range at day 365 across simulations with at least 10 cases.
+older. Points denote the median at day 365 across simulations with at
+least 10 cases. The interquartile ranges are drawn as vertical bars but
+are mostly hidden by the points, since they span only 15 to 61
+infections; they are listed in the table.
 
 </div>
