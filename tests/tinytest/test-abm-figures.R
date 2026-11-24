@@ -7,8 +7,7 @@ source(file.path("..", "..", "Figure_Data", "FigureABM.R"))
 
 scenarios_dir <- file.path("..", "..", "scenarios")
 
-s     <- abm_summaries(scenarios_dir)
-paper <- abm_summaries(scenarios_dir, paper_arms = TRUE)
+s <- abm_summaries(scenarios_dir)
 
 # Runs and exclusions
 expect_equal(as.character(s$runs$scenario), FOCAL_SCENARIOS$label)
@@ -28,16 +27,14 @@ expect_equal(length(weeks), 53L)
 expect_true(all(format(weeks, "%u") == "1"))
 expect_true(all(s$weekly[, q25 <= median & median <= q75]))
 
+# Peak dates are one per retained run and fall inside the simulation period.
+expect_equal(nrow(s$peak), nrow(s$final))
+expect_true(all(s$peak$peak_date >= START_DATE))
+expect_true(all(s$peak$peak_date <= START_DATE + 365))
+
 # Interventions reduce the outbreak; quarantine adds to self-isolation
 med <- s$final[, .(median = median(outbreak_size)), by = scenario]$median
 expect_true(all(diff(med) < 0))
-
-# The published arms differ only for the scenario with quarantine
-expect_equal(s$runs[1:2], paper$runs[1:2])
-expect_true(
-  median(s$final[scenario == FOCAL_SCENARIOS$label[3]]$outbreak_size) <
-    median(paper$final[scenario == FOCAL_SCENARIOS$label[3]]$outbreak_size)
-)
 
 # The figure is written
 out <- save_abm_figure(s, file.path(tempdir(), "Figure4CD"))

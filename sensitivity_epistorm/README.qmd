@@ -75,6 +75,112 @@ kable(
 ```
 
 ```{r}
+#| label: tbl-si5
+# Supplementary Table SI 5 compares the two contact matrices at R0 = 9.
+# Simulations with fewer than 10 final cases are stochastic extinctions.
+table_si5 <- sizes[r0 == 9, .(
+  scenario,
+  matrix,
+  `Die out` = sprintf("%g%%", round(100 * (runs - retained) / runs, 1)),
+  Median = fmt(median),
+  IQR = sprintf("%s-%s", fmt(q25), fmt(q75))
+)]
+table_si5 <- dcast(
+  table_si5,
+  scenario ~ matrix,
+  value.var = c("Die out", "Median", "IQR")
+)
+setcolorder(
+  table_si5,
+  c(
+    "scenario",
+    "Die out_POLYMOD", "Median_POLYMOD", "IQR_POLYMOD",
+    "Die out_Epistorm-Mix", "Median_Epistorm-Mix", "IQR_Epistorm-Mix"
+  )
+)
+setnames(
+  table_si5,
+  c(
+    "Scenario",
+    "POLYMOD mixing: % die out", "POLYMOD mixing: Median", "POLYMOD mixing: IQR",
+    "Epistorm-Mix mixing: % die out", "Epistorm-Mix mixing: Median",
+    "Epistorm-Mix mixing: IQR"
+  )
+)
+
+kable(
+  table_si5,
+  align = "lrrrrrr",
+  caption = paste(
+    "Table SI 5. Comparison of final outbreak size at R0 = 9 from POLYMOD",
+    "and Epistorm-Mix contact-matrix assumptions. Extinction is fewer than",
+    "10 final cases; medians and interquartile ranges are across retained runs."
+  )
+)
+```
+
+```{r}
+#| label: tbl-si6
+# Supplementary Table SI 6 compares peak-incidence dates at R0 = 9. As in
+# Table SI 4, each retained run contributes its first date of maximum daily
+# incidence; the table summarizes those dates across runs.
+PEAK_R0 <- 9
+fmt_date <- function(x) format(x, "%m/%d/%Y")
+
+peak_summary <- rbindlist(lapply(names(MATRICES), function(m) {
+  s <- abm_summaries(
+    MATRICES[[m]],
+    PEAK_R0,
+    epistorm = m == "Epistorm-Mix"
+  )
+  s$peak[, .(
+    median = median(peak_date),
+    q25 = as.Date(quantile(as.numeric(peak_date), 0.25, names = FALSE),
+                  origin = "1970-01-01"),
+    q75 = as.Date(quantile(as.numeric(peak_date), 0.75, names = FALSE),
+                  origin = "1970-01-01")
+  ), by = scenario][, matrix := m]
+}))
+peak_summary[, iqr := sprintf("%s-%s", fmt_date(q25), fmt_date(q75))]
+
+table_si6 <- dcast(
+  peak_summary,
+  scenario ~ matrix,
+  value.var = c("median", "iqr")
+)
+setcolorder(
+  table_si6,
+  c(
+    "scenario",
+    "median_POLYMOD", "iqr_POLYMOD",
+    "median_Epistorm-Mix", "iqr_Epistorm-Mix"
+  )
+)
+setnames(
+  table_si6,
+  c(
+    "Scenario",
+    "POLYMOD mixing: Median", "POLYMOD mixing: IQR",
+    "Epistorm-Mix mixing: Median", "Epistorm-Mix mixing: IQR"
+  )
+)
+
+for (column in c("POLYMOD mixing: Median", "Epistorm-Mix mixing: Median")) {
+  set(table_si6, j = column, value = fmt_date(table_si6[[column]]))
+}
+
+kable(
+  table_si6,
+  align = "lrrrr",
+  caption = paste(
+    "Table SI 6. Comparison of peak-incidence dates at R0 = 9 from POLYMOD",
+    "and Epistorm-Mix contact-matrix assumptions. Median and interquartile",
+    "range are across runs with 10 or more cases."
+  )
+)
+```
+
+```{r}
 #| label: fig-epistorm
 #| fig-width: 9
 #| fig-height: 4

@@ -44,6 +44,43 @@ across the retained runs, by contact matrix.
 
 </div>
 
+<div id="tbl-si5">
+
+Table 2: Table SI 5. Comparison of final outbreak size at R0 = 9 from
+POLYMOD and Epistorm-Mix contact-matrix assumptions. Extinction is fewer
+than 10 final cases; medians and interquartile ranges are across
+retained runs.
+
+<div class="cell-output-display">
+
+| Scenario | POLYMOD mixing: % die out | POLYMOD mixing: Median | POLYMOD mixing: IQR | Epistorm-Mix mixing: % die out | Epistorm-Mix mixing: Median | Epistorm-Mix mixing: IQR |
+|:---|---:|---:|---:|---:|---:|---:|
+| No interventions | 21.3% | 2,703 | 2,688-2,716 | 11.9% | 2,818 | 2,805-2,828 |
+| Self-isolation only | 30.2% | 2,567 | 2,550-2,584 | 20% | 2,708 | 2,691-2,725 |
+| Self-isolation with quarantine | 42.3% | 2,136 | 2,104-2,165 | 33.2% | 2,267 | 2,237-2,297 |
+
+</div>
+
+</div>
+
+<div id="tbl-si6">
+
+Table 3: Table SI 6. Comparison of peak-incidence dates at R0 = 9 from
+POLYMOD and Epistorm-Mix contact-matrix assumptions. Median and
+interquartile range are across runs with 10 or more cases.
+
+<div class="cell-output-display">
+
+| Scenario | POLYMOD mixing: Median | POLYMOD mixing: IQR | Epistorm-Mix mixing: Median | Epistorm-Mix mixing: IQR |
+|:---|---:|---:|---:|---:|
+| No interventions | 10/21/2025 | 10/09/2025-11/04/2025 | 10/29/2025 | 10/18/2025-11/09/2025 |
+| Self-isolation only | 10/29/2025 | 10/16/2025-11/13/2025 | 11/09/2025 | 10/28/2025-11/25/2025 |
+| Self-isolation with quarantine | 11/09/2025 | 10/25/2025-11/27/2025 | 11/27/2025 | 11/11/2025-12/20/2025 |
+
+</div>
+
+</div>
+
 <div id="fig-epistorm">
 
 ![](README_files/figure-commonmark/fig-epistorm-1.png)

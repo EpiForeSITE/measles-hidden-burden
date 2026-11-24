@@ -9,7 +9,9 @@ Run from the repository root with `make figures`:
 | Script | Panels | Inputs | Output |
 |---|---|---|---|
 | [`FigurePhylodynamic.R`](./FigurePhylodynamic.R) | A-B: effective population size and linked outbreak size | `EBSP_epi.log`, `EBSP_genomepi.log`, [`../plotEBSP.R`](../plotEBSP.R) | `Figure4AB.{png,pdf}` and the full `Figure4.{png,pdf}` |
-| [`FigureABM.R`](./FigureABM.R) | C-D: weekly cases and final outbreak size from the model | R0 = 9 outputs in [`../scenarios/`](../scenarios) | `Figure4CD.{png,pdf}`; with `--paper-arms`, `Figure4CD_paper_arms.{png,pdf}` |
+| [`FigureABM.R`](./FigureABM.R) | C-D: weekly cases and final outbreak size from the model | R0 = 9 outputs in [`../scenarios/`](../scenarios) | `Figure4CD.{png,pdf}` |
+| [`FigureSI7.R`](./FigureSI7.R) | SI 7: weekly incidence and final outbreak-size distributions across R0 values | Main-scenario outputs in [`../scenarios/`](../scenarios) | `FigureSI7.{png,pdf}` |
+| [`FigureSI9.R`](./FigureSI9.R) | SI 9: projected incidence and final outbreak size under POLYMOD and Epistorm-Mix assumptions | R0 = 9 outputs in [`../scenarios/`](../scenarios) and [`../sensitivity_epistorm/`](../sensitivity_epistorm) | `FigureSI9.{png,pdf}` |
 
 `FigureABM.R` also holds the helpers that the summary `README.qmd` files of the model folders use (`abm_summaries()`, `scenario_file()`, the colors and theme). `model-inputs.{png,svg}` is a diagram of the model inputs.
 
