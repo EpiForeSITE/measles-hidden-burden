@@ -97,10 +97,10 @@ simulations were conducted across values of R0 from 5 to 17 under three
 scenarios: no interventions, self-isolation only (50% reduction in
 contacts after rash onset), and self-isolation with quarantine (75%
 reduction in contacts after rash onset plus contact tracing and
-quarantine). The left panel shows the median final community outbreak
-size at day 365; points and vertical bars denote the median and
-interquartile range among simulations with at least 10 cases. The right
-panel shows the percentage of 1,000 simulations per scenario that
-produced at least 10 cases. The dashed vertical line marks R0 = 9.
+quarantine). (A) Final community outbreak size at day 365: lines show
+the median and shaded bands the interquartile range among simulations
+with at least 10 cases. (B) Percentage of the 1,000 simulations per
+scenario that produced at least 10 cases. The dashed vertical line marks
+R0 = 9.
 
 </div>

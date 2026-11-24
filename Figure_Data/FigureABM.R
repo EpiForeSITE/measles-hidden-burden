@@ -42,10 +42,9 @@ FOCAL_SCENARIOS <- data.table(
   )
 )
 
-# First three slots of the reference categorical palette (dataviz skill),
-# validated for all pairs, including under color-vision deficiencies
+# Scenario colors of Figure 4 in the first submission, used in every figure
 SCENARIO_COLORS <- setNames(
-  c("#2a78d6", "#eb6834", "#1baf7a"),
+  c("#E4937B", "#8B7BAD", "#4F868E"),
   FOCAL_SCENARIOS$label
 )
 
@@ -54,7 +53,7 @@ INK_SECONDARY <- "#52514e"
 GRID_COLOR    <- "#e4e3df"
 
 # Date range shared by the time panels of Figure 4 (A and C)
-FIGURE4_XLIM <- as.Date(c("2025-07-01", "2026-03-01"))
+FIGURE4_XLIM <- as.Date(c("2025-07-14", "2026-02-28"))
 
 #' Path of the simulation output of one scenario
 scenario_file <- function(
@@ -190,178 +189,135 @@ theme_figure4 <- function(base_size = 11) {
     )
 }
 
+#' Style of Figure 4 in the first submission (as cowplot::theme_cowplot(),
+#' with larger text)
+theme_submission <- function(base_size = 15) {
+  theme_classic(base_size = base_size) +
+    theme(
+      text         = element_text(color = "black"),
+      axis.line    = element_line(color = "black"),
+      axis.ticks   = element_line(color = "black"),
+      axis.text    = element_text(color = "black", size = base_size),
+      axis.title.x = element_text(vjust = -1, size = base_size),
+      axis.title.y = element_text(vjust = 2, size = base_size),
+      legend.text  = element_text(size = base_size),
+      legend.background = element_blank(),
+      plot.tag     = element_text(face = "bold", size = base_size + 5),
+      plot.margin  = margin(10, 10, 14, 10)
+    )
+}
+
+#' Monthly date axis of the time panels (A and C)
+scale_x_months <- function() {
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y")
+}
+
 #' Figure 4C: weekly cases over time (median and IQR across runs)
 plot_abm_weekly <- function(summaries, xlim = FIGURE4_XLIM) {
-  weekly <- summaries$weekly[week <= xlim[2]]
-
-  peaks <- weekly[, .SD[which.max(median)], by = scenario]
-  peaks[, label := sprintf(
-    "%s cases, week of %s",
-    format(round(median), big.mark = ","),
-    format(week, "%b %d")
-  )]
-
-  ggplot(weekly, aes(x = week, color = scenario, fill = scenario)) +
-    geom_ribbon(aes(ymin = q25, ymax = q75), alpha = 0.12, color = NA) +
-    geom_line(aes(y = q25), linewidth = 0.25, alpha = 0.6) +
-    geom_line(aes(y = q75), linewidth = 0.25, alpha = 0.6) +
-    geom_line(aes(y = median), linewidth = 0.8) +
-    geom_point(
-      data   = peaks,
-      aes(y = median),
-      size   = 2.2,
-      shape  = 21,
-      stroke = 0.8,
-      fill   = "white"
-    ) +
-    geom_label(
-      data          = peaks,
-      aes(y = median, label = label),
-      color         = INK_PRIMARY,
-      fill          = "white",
-      alpha         = 0.85,
-      linewidth     = 0,
-      label.padding = grid::unit(0.12, "lines"),
-      hjust         = 0,
-      nudge_x       = 5,
-      vjust         = 0,
-      nudge_y       = 6,
-      size          = 3,
-      show.legend   = FALSE
-    ) +
-    scale_color_manual(values = SCENARIO_COLORS, drop = FALSE) +
-    scale_fill_manual(values = SCENARIO_COLORS, drop = FALSE) +
-    scale_x_date(
-      date_breaks = "1 month",
-      date_labels = "%b\n%Y",
-      expand      = expansion(mult = c(0.01, 0.02))
-    ) +
-    scale_y_continuous(
-      labels = function(x) format(x, big.mark = ","),
-      expand = expansion(mult = c(0, 0.08))
-    ) +
-    coord_cartesian(xlim = xlim, clip = "off") +
+  ggplot(
+    summaries$weekly,
+    aes(x = week, y = median, color = scenario, fill = scenario)
+  ) +
+    geom_ribbon(aes(ymin = q25, ymax = q75), alpha = 0.2, color = NA) +
+    geom_line(linewidth = 1) +
+    scale_color_manual(values = SCENARIO_COLORS) +
+    scale_fill_manual(values = SCENARIO_COLORS) +
+    scale_x_months() +
+    coord_cartesian(xlim = xlim) +
     labs(
-      x        = NULL,
-      y        = "New cases per week",
-      title    = "Weekly cases",
-      subtitle = "Median (line) and interquartile range (band) across runs",
-      tag      = "C"
+      x     = "Date",
+      y     = "Weekly Cases",
+      color = "Among cases from the community",
+      fill  = "Among cases from the community",
+      tag   = "C"
     ) +
-    guides(color = guide_legend(nrow = 1), fill = "none") +
-    theme_figure4()
+    theme_submission() +
+    theme(
+      legend.position = c(0.78, 0.8),
+      axis.text.x     = element_text(hjust = 1, angle = 30)
+    )
 }
 
 #' Figure 4D: final outbreak size (cases by day 365) per run
 #'
-#' The y-axis zooms on the large outbreaks (> `large` cases); the number of
-#' retained runs below that is reported in the subtitle, and every run counts
-#' in the boxes and medians.
+#' The boxes summarize every retained run; the y-axis zooms on the large
+#' outbreaks (more than `large` cases), as in the first submission.
 plot_abm_final <- function(summaries, large = 100) {
   final <- summaries$final
-  runs  <- summaries$runs
+  ylim  <- range(final[outbreak_size > large]$outbreak_size)
 
-  medians <- final[, .(median = median(outbreak_size)), by = scenario]
-
-  n_small  <- final[outbreak_size <= large, .N]
-  ylim     <- range(final[outbreak_size > large]$outbreak_size)
-  ylim     <- ylim + c(-1, 1) * 0.04 * diff(ylim)
-  subtitle <- "Each dot is a run; box shows median and IQR"
-  if (n_small > 0) {
-    subtitle <- sprintf(
-      "%s\n%d run%s with %d-%d cases not shown",
-      subtitle,
-      n_small,
-      if (n_small > 1) "s" else "",
-      MIN_OUTBREAK_SIZE,
-      large
-    )
-  }
-
-  axis_labels <- setNames(
-    sprintf(
-      "%s\n%s of %s runs",
-      sub(" with ", "\nwith ", runs$scenario),
-      format(runs$retained, big.mark = ","),
-      format(runs$runs, big.mark = ",")
-    ),
-    runs$scenario
-  )
-
-  set.seed(1231)
-  ggplot(final, aes(x = scenario, y = outbreak_size, color = scenario)) +
-    geom_jitter(width = 0.2, height = 0, size = 0.7, alpha = 0.3) +
-    geom_boxplot(
-      width         = 0.5,
-      fill          = NA,
-      color         = INK_PRIMARY,
-      linewidth     = 0.4,
-      outlier.shape = NA
-    ) +
-    geom_text(
-      data    = medians,
-      aes(y = median, label = format(round(median), big.mark = ",")),
-      color   = INK_PRIMARY,
-      nudge_x = 0.3,
-      hjust   = 0,
-      size    = 3.2
-    ) +
+  ggplot(
+    final,
+    aes(x = scenario, y = outbreak_size, color = scenario, fill = scenario)
+  ) +
+    geom_boxplot(alpha = 0.8) +
+    scale_fill_manual(values = SCENARIO_COLORS, guide = "none") +
     scale_color_manual(values = SCENARIO_COLORS, guide = "none") +
     scale_x_discrete(
-      labels = axis_labels,
-      expand = expansion(add = c(0.5, 0.75))
+      labels = c(
+        "No\nInterventions",
+        "Self-Isolation\nOnly",
+        "Self-Isolation\nWith Quarantine"
+      )
     ) +
     scale_y_continuous(labels = function(x) format(x, big.mark = ",")) +
     coord_cartesian(ylim = ylim) +
-    labs(
-      x        = NULL,
-      y        = "Infections by day 365",
-      title    = "Community outbreak size",
-      subtitle = subtitle,
-      tag      = "D"
-    ) +
-    theme_figure4() +
-    theme(axis.text.x = element_text(color = INK_PRIMARY, lineheight = 0.95))
+    labs(x = NULL, y = "Community Outbreak Size", tag = "D") +
+    theme_submission()
 }
 
-#' Draws panels C and D side by side and saves them as PNG and PDF
-save_abm_figure <- function(
-    summaries,
-    file,
-    width  = 12,
-    height = 4.8
-) {
-  draw <- function() {
-    grid::grid.newpage()
-    grid::pushViewport(grid::viewport(
-      layout = grid::grid.layout(1, 2, widths = grid::unit(c(1.55, 1), "null"))
-    ))
-    print(
-      plot_abm_weekly(summaries),
-      vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1)
+#' Draws a grid of ggplots (a list of rows) on the current device
+draw_panels <- function(rows, widths = c(1.6, 1)) {
+  grid::grid.newpage()
+  grid::pushViewport(grid::viewport(
+    layout = grid::grid.layout(
+      length(rows),
+      length(widths),
+      widths = grid::unit(widths, "null")
     )
-    print(
-      plot_abm_final(summaries),
-      vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 2)
-    )
+  ))
+  for (i in seq_along(rows)) {
+    for (j in seq_along(rows[[i]])) {
+      print(
+        rows[[i]][[j]],
+        vp = grid::viewport(layout.pos.row = i, layout.pos.col = j)
+      )
+    }
   }
+}
 
+#' Draws a grid of ggplots and saves it as PNG and PDF
+save_panels <- function(
+    rows,
+    file,
+    width  = 16,
+    height = 5.5 * length(rows),
+    widths = c(1.6, 1)
+) {
   ragg::agg_png(
     paste0(file, ".png"),
-    width  = width,
-    height = height,
-    units  = "in",
-    res    = 300,
+    width      = width,
+    height     = height,
+    units      = "in",
+    res        = 300,
     background = "white"
   )
-  draw()
+  draw_panels(rows, widths)
   grDevices::dev.off()
 
   grDevices::pdf(paste0(file, ".pdf"), width = width, height = height)
-  draw()
+  draw_panels(rows, widths)
   grDevices::dev.off()
 
   invisible(paste0(file, c(".png", ".pdf")))
+}
+
+#' Draws panels C and D side by side and saves them as PNG and PDF
+save_abm_figure <- function(summaries, file) {
+  save_panels(
+    list(list(plot_abm_weekly(summaries), plot_abm_final(summaries))),
+    file
+  )
 }
 
 if (sys.nframe() == 0L) {

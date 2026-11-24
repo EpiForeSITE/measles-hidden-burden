@@ -29,10 +29,8 @@ EBSP_LOGS <- c(
   "Genomic inclusion"         = file.path("Figure_Data", "EBSP_genomepi.log")
 )
 
-# Violet and yellow from the reference categorical palette (dataviz skill):
-# the most separable pair (validated for all pairs, including under
-# color-vision deficiencies) outside the three slots of the ABM scenarios
-INCLUSION_COLORS <- setNames(c("#6250d6", "#eda100"), names(EBSP_LOGS))
+# Colors of Figure 4 in the first submission
+INCLUSION_COLORS <- setNames(c("#9C7BB2", "#B0895A"), names(EBSP_LOGS))
 
 #' Scaled Ne over time and linked outbreak size from one EBSP log
 #'
@@ -96,154 +94,55 @@ phylo_summaries <- function(logs = EBSP_LOGS, r0 = 9) {
   list(ne = bind("ne"), total = bind("total"))
 }
 
-#' Figure 4A: scaled Ne over time
+#' Figure 4A: scaled Ne over time (median and 95% interval)
 plot_phylo_ne <- function(summaries, xlim = FIGURE4_XLIM) {
-  ne <- summaries$ne[date >= xlim[1] & date <= xlim[2]]
-
-  peaks <- ne[, .SD[which.max(median)], by = inclusion]
-  peaks[, label := sprintf(
-    "%s, %s",
-    format(round(median), big.mark = ","),
-    format(date, "%b %d")
-  )]
-
-  ggplot(ne, aes(x = date, color = inclusion, fill = inclusion)) +
-    geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.12, color = NA) +
-    geom_line(aes(y = lower), linewidth = 0.25, alpha = 0.6) +
-    geom_line(aes(y = upper), linewidth = 0.25, alpha = 0.6) +
-    geom_line(aes(y = median), linewidth = 0.8) +
-    geom_point(
-      data   = peaks,
-      aes(y = median),
-      size   = 2.2,
-      shape  = 21,
-      stroke = 0.8,
-      fill   = "white"
-    ) +
-    geom_label(
-      data          = peaks,
-      aes(y = median, label = label),
-      color         = INK_PRIMARY,
-      fill          = "white",
-      alpha         = 0.85,
-      linewidth     = 0,
-      label.padding = grid::unit(0.12, "lines"),
-      hjust         = 0,
-      nudge_x       = 5,
-      vjust         = 0,
-      nudge_y       = 4,
-      size          = 3,
-      show.legend   = FALSE
-    ) +
-    scale_color_manual(values = INCLUSION_COLORS) +
-    scale_fill_manual(values = INCLUSION_COLORS) +
-    scale_x_date(
-      date_breaks = "1 month",
-      date_labels = "%b\n%Y",
-      expand      = expansion(mult = c(0.01, 0.02))
-    ) +
-    scale_y_continuous(
-      labels = function(x) format(x, big.mark = ","),
-      expand = expansion(mult = c(0, 0.05))
-    ) +
-    expand_limits(y = 0) +
-    coord_cartesian(xlim = xlim, clip = "off") +
+  ggplot(
+    summaries$ne,
+    aes(x = date, y = median, color = inclusion, fill = inclusion)
+  ) +
+    geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color = NA) +
+    geom_line(linewidth = 1.5) +
+    scale_color_manual(values = INCLUSION_COLORS, name = NULL) +
+    scale_fill_manual(values = INCLUSION_COLORS, name = NULL) +
+    scale_x_months() +
+    coord_cartesian(xlim = xlim) +
     labs(
-      x        = NULL,
-      y        = expression("Scaled effective population size, " * N[e]),
-      title    = "Effective population size",
-      subtitle = "Median (line) and 95% interval (band) across posterior samples",
-      tag      = "A"
+      x   = "Date",
+      y   = expression(Effective~Population~Size~(N[e])),
+      tag = "A"
     ) +
-    guides(color = guide_legend(nrow = 1), fill = "none") +
-    theme_figure4()
+    theme_submission() +
+    theme(
+      legend.position = c(0.2, 0.85),
+      axis.text.x     = element_text(hjust = 1, angle = 30)
+    )
 }
 
-#' Figure 4B: linked outbreak size (median and 95% bounds)
+#' Figure 4B: linked outbreak size (box from the lower to the upper 95%
+#' bound, line at the median)
 plot_phylo_total <- function(summaries) {
-  total <- summaries$total
-  total[, label := sprintf(
-    "%s\n(%s-%s)",
-    format(round(median), big.mark = ","),
-    format(round(lower), big.mark = ","),
-    format(round(upper), big.mark = ",")
-  )]
-
-  ggplot(total, aes(x = inclusion, y = median, color = inclusion)) +
-    geom_linerange(aes(ymin = lower, ymax = upper), linewidth = 2.4, alpha = 0.35) +
-    geom_point(size = 3.4, shape = 21, stroke = 1, fill = "white") +
-    geom_text(
-      aes(label = label),
-      color      = INK_PRIMARY,
-      nudge_x    = 0.12,
-      hjust      = 0,
-      size       = 3.2,
-      lineheight = 0.95
+  ggplot(
+    summaries$total,
+    aes(x = inclusion, fill = inclusion, color = inclusion)
+  ) +
+    geom_boxplot(
+      aes(
+        ymin   = lower,
+        lower  = lower,
+        middle = median,
+        upper  = upper,
+        ymax   = upper
+      ),
+      stat  = "identity",
+      width = 0.9,
+      alpha = 0.6
     ) +
+    scale_fill_manual(values = INCLUSION_COLORS, guide = "none") +
     scale_color_manual(values = INCLUSION_COLORS, guide = "none") +
-    scale_x_discrete(
-      labels = function(x) sub(" ", "\n", x),
-      expand = expansion(add = c(0.5, 0.9))
-    ) +
-    scale_y_continuous(
-      labels = function(x) format(x, big.mark = ","),
-      limits = c(0, NA),
-      expand = expansion(mult = c(0, 0.05))
-    ) +
-    labs(
-      x        = NULL,
-      y        = "Infections",
-      title    = "Linked outbreak size",
-      subtitle = "Median (dot) and 95% bounds (bar), R0 = 9",
-      tag      = "B"
-    ) +
-    theme_figure4() +
-    theme(axis.text.x = element_text(color = INK_PRIMARY, lineheight = 0.95))
-}
-
-#' Draws a grid of ggplots (a list of rows) and saves it as PNG and PDF
-save_panels <- function(
-    rows,
-    file,
-    width  = 12,
-    height = 4.8 * length(rows),
-    widths = c(1.55, 1)
-) {
-  draw <- function() {
-    grid::grid.newpage()
-    grid::pushViewport(grid::viewport(
-      layout = grid::grid.layout(
-        length(rows),
-        2,
-        widths = grid::unit(widths, "null")
-      )
-    ))
-    for (i in seq_along(rows)) {
-      for (j in seq_along(rows[[i]])) {
-        print(
-          rows[[i]][[j]],
-          vp = grid::viewport(layout.pos.row = i, layout.pos.col = j)
-        )
-      }
-    }
-  }
-
-  ragg::agg_png(
-    paste0(file, ".png"),
-    width      = width,
-    height     = height,
-    units      = "in",
-    res        = 300,
-    background = "white"
-  )
-  draw()
-  grDevices::dev.off()
-
-  grDevices::pdf(paste0(file, ".pdf"), width = width, height = height)
-  draw()
-  grDevices::dev.off()
-
-  invisible(paste0(file, c(".png", ".pdf")))
+    scale_x_discrete(labels = function(x) sub(" ", " \n", tools::toTitleCase(x))) +
+    scale_y_continuous(labels = function(x) format(x, big.mark = ",")) +
+    labs(x = "Sample Inclusion", y = "Linked Outbreak Size", tag = "B") +
+    theme_submission()
 }
 
 if (sys.nframe() == 0L) {

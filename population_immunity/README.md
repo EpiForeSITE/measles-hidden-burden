@@ -48,7 +48,7 @@ years, under no interventions, self-isolation only, and self-isolation
 with quarantine. Panels show total infections, infections among children
 younger than 18 years, and infections among adults aged 18 years or
 older. Points denote the median at day 365 across simulations with at
-least 10 cases; thick and thin vertical bars denote the 50%
-(interquartile) and 95% intervals across those simulations.
+least 10 cases; vertical bars denote the 95% interval (2.5th to 97.5th
+percentiles) across those simulations.
 
 </div>
